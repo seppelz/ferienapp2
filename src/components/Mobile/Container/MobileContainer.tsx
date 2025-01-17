@@ -320,7 +320,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({
       case 'school':
         return renderView(
           <MobileSchoolHolidaysView
-            schoolHolidays={schoolHolidays}
+            holidays={schoolHolidays}
             personId={personId}
             onHolidaySelect={handleHolidaySelect}
           />

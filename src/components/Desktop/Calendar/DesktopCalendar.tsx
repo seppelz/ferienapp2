@@ -51,10 +51,26 @@ const DateTooltip: React.FC<DateTooltipProps> = ({
 
   // Add holiday information
   if (holidayTypes.firstState.holiday?.name) {
+    const holidayName = holidayTypes.firstState.holiday.name
+      .split(' ')
+      .map(word => {
+        // Capitalize first letter of specific words
+        if (['sommerferien', 'winterferien', 'osterferien', 'herbstferien', 'pfingstferien', 'weihnachtsferien'].includes(word.toLowerCase())) {
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        }
+        // Capitalize state names
+        if (['baden-württemberg', 'bayern', 'berlin', 'brandenburg', 'bremen', 'hamburg', 'hessen', 'mecklenburg-vorpommern', 'niedersachsen', 'nordrhein-westfalen', 'rheinland-pfalz', 'saarland', 'sachsen', 'sachsen-anhalt', 'schleswig-holstein', 'thüringen'].includes(word.toLowerCase())) {
+          return word.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-');
+        }
+        return word;
+      })
+      .join(' ');
+
+    const prefix = holidayTypes.firstState.type === 'school' ? 'Schulferien:' : 'Feiertag:';
     items.push({
-      icon: '🎉',
-      text: `Feiertag: ${holidayTypes.firstState.holiday.name}`,
-      className: 'text-red-700'
+      icon: holidayTypes.firstState.type === 'school' ? '📚' : '🎉',
+      text: `${prefix} ${holidayName}`,
+      className: holidayTypes.firstState.type === 'school' ? 'text-purple-700' : 'text-red-700'
     });
   }
 
@@ -133,26 +149,45 @@ const getHolidayColor = (type: string, theme: any, personId: 1 | 2) => {
 
 // Helper function to safely get date from a Holiday
 const getHolidayDate = (holiday: Holiday): Date => {
-  if ('date' in holiday && holiday.date) {
-    return new Date(holiday.date);
-  } else if ('start' in holiday && holiday.start) {
-    return new Date(holiday.start);
+  try {
+    let date: Date;
+    if ('date' in holiday && holiday.date) {
+      // Parse the date and explicitly set the time to noon in local timezone
+      const [year, month, day] = holiday.date.split('-').map(Number);
+      date = new Date(year, month - 1, day, 12, 0, 0, 0);
+    } else if ('start' in holiday && holiday.start) {
+      // Parse the start date and explicitly set the time to noon in local timezone
+      const [year, month, day] = holiday.start.split('-').map(Number);
+      date = new Date(year, month - 1, day, 12, 0, 0, 0);
+    } else {
+      throw new Error('Invalid holiday date');
+    }
+    return date;
+  } catch (error) {
+    console.error('Error parsing holiday date:', error);
+    throw error;
   }
-  throw new Error('Invalid holiday date');
 };
 
 // Helper function to check if a holiday is on a specific date
 const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
   try {
+    const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
+    
     if ('date' in holiday && holiday.date) {
-      return isSameDay(new Date(holiday.date), date);
+      const [year, month, day] = holiday.date.split('-').map(Number);
+      const holidayDate = new Date(year, month - 1, day, 12, 0, 0, 0);
+      return isSameDay(holidayDate, compareDate);
     } else if ('start' in holiday && holiday.start && holiday.end) {
-      const start = new Date(holiday.start);
-      const end = new Date(holiday.end);
-      return isWithinInterval(date, { start, end });
+      const [startYear, startMonth, startDay] = holiday.start.split('-').map(Number);
+      const [endYear, endMonth, endDay] = holiday.end.split('-').map(Number);
+      const start = new Date(startYear, startMonth - 1, startDay, 12, 0, 0, 0);
+      const end = new Date(endYear, endMonth - 1, endDay, 12, 0, 0, 0);
+      return isWithinInterval(compareDate, { start, end });
     }
     return false;
-  } catch {
+  } catch (error) {
+    console.error('Error checking holiday date:', error);
     return false;
   }
 };
@@ -490,23 +525,40 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
 
     // Handle vacation and holiday combinations
     if (vacationInfo.isSharedVacation) {
+      // If there's also a holiday, show a triple gradient
+      if (holidayTypes.firstState.type === 'public' || holidayTypes.secondState.type === 'public') {
+        return `${baseClasses} bg-gradient-to-r from-emerald-500 via-red-100/80 to-cyan-500 text-white cursor-pointer ${focusClasses}`;
+      }
+      if (holidayTypes.firstState.type === 'school' || holidayTypes.secondState.type === 'school') {
+        return `${baseClasses} bg-gradient-to-r from-emerald-500 via-purple-100/80 to-cyan-500 text-white cursor-pointer ${focusClasses}`;
+      }
       return `${baseClasses} bg-gradient-to-r from-emerald-500 to-cyan-500 text-white cursor-pointer ${focusClasses}`;
     }
 
     // Handle person1 vacation with holidays
     if (vacationInfo.person1Vacation) {
-      if (holidayTypes.firstState.type) {
-        const holidayColor = getHolidayColor(holidayTypes.firstState.type, theme, 1);
-        return `${baseClasses} ${holidayColor} cursor-pointer ${focusClasses}`;
+      if (holidayTypes.firstState.type === 'public') {
+        return `${baseClasses} bg-gradient-to-r from-emerald-100 to-red-100/80 text-red-700 cursor-pointer ${focusClasses}`;
+      }
+      if (holidayTypes.firstState.type === 'school') {
+        return `${baseClasses} bg-gradient-to-r from-emerald-100 to-purple-100/80 text-purple-700 cursor-pointer ${focusClasses}`;
+      }
+      if (holidayTypes.firstState.type === 'bridge') {
+        return `${baseClasses} bg-gradient-to-r from-emerald-100 to-orange-100/80 text-orange-700 cursor-pointer ${focusClasses}`;
       }
       return `${baseClasses} bg-emerald-100 text-emerald-700 cursor-pointer ${focusClasses}`;
     }
 
     // Handle person2 vacation with holidays
     if (vacationInfo.person2Vacation) {
-      if (holidayTypes.secondState.type) {
-        const holidayColor = getHolidayColor(holidayTypes.secondState.type, theme, 2);
-        return `${baseClasses} ${holidayColor} cursor-pointer ${focusClasses}`;
+      if (holidayTypes.secondState.type === 'public') {
+        return `${baseClasses} bg-gradient-to-r from-cyan-100 to-red-100/80 text-red-700 cursor-pointer ${focusClasses}`;
+      }
+      if (holidayTypes.secondState.type === 'school') {
+        return `${baseClasses} bg-gradient-to-r from-cyan-100 to-purple-100/80 text-purple-700 cursor-pointer ${focusClasses}`;
+      }
+      if (holidayTypes.secondState.type === 'bridge') {
+        return `${baseClasses} bg-gradient-to-r from-cyan-100 to-orange-100/80 text-orange-700 cursor-pointer ${focusClasses}`;
       }
       return `${baseClasses} bg-cyan-100 text-cyan-700 cursor-pointer ${focusClasses}`;
     }
@@ -514,21 +566,43 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
     // Handle overlapping holidays between states
     if (holidayTypes.firstState.type && holidayTypes.secondState.type) {
       if (holidayTypes.firstState.type === holidayTypes.secondState.type) {
-        const color = getHolidayColor(holidayTypes.firstState.type, theme, 1);
-        return `${baseClasses} ${color} cursor-pointer ${focusClasses}`;
+        if (holidayTypes.firstState.type === 'public') {
+          return `${baseClasses} bg-red-100/80 text-red-700 cursor-pointer ${focusClasses}`;
+        }
+        if (holidayTypes.firstState.type === 'school') {
+          return `${baseClasses} bg-purple-100/80 text-purple-700 cursor-pointer ${focusClasses}`;
+        }
+        if (holidayTypes.firstState.type === 'bridge') {
+          return `${baseClasses} bg-orange-100/80 text-orange-700 cursor-pointer ${focusClasses}`;
+        }
       }
-      return `${baseClasses} bg-gradient-to-r from-emerald-100 to-cyan-100 text-gray-700 cursor-pointer ${focusClasses}`;
+      // Different holiday types overlapping
+      const firstColor = holidayTypes.firstState.type === 'public' ? 'red' : 
+                        holidayTypes.firstState.type === 'school' ? 'purple' : 'orange';
+      const secondColor = holidayTypes.secondState.type === 'public' ? 'red' : 
+                         holidayTypes.secondState.type === 'school' ? 'purple' : 'orange';
+      return `${baseClasses} bg-gradient-to-r from-${firstColor}-100/80 to-${secondColor}-100/80 text-gray-700 cursor-pointer ${focusClasses}`;
     }
 
     // Handle single state holidays
-    if (holidayTypes.firstState.type) {
-      const color = getHolidayColor(holidayTypes.firstState.type, theme, 1);
-      return `${baseClasses} ${color} cursor-pointer ${focusClasses}`;
+    if (holidayTypes.firstState.type === 'public') {
+      return `${baseClasses} bg-red-100/80 text-red-700 cursor-pointer ${focusClasses}`;
+    }
+    if (holidayTypes.firstState.type === 'school') {
+      return `${baseClasses} bg-purple-100/80 text-purple-700 cursor-pointer ${focusClasses}`;
+    }
+    if (holidayTypes.firstState.type === 'bridge') {
+      return `${baseClasses} bg-orange-100/80 text-orange-700 cursor-pointer ${focusClasses}`;
     }
 
-    if (holidayTypes.secondState.type) {
-      const color = getHolidayColor(holidayTypes.secondState.type, theme, 2);
-      return `${baseClasses} ${color} cursor-pointer ${focusClasses}`;
+    if (holidayTypes.secondState.type === 'public') {
+      return `${baseClasses} bg-red-100/80 text-red-700 cursor-pointer ${focusClasses}`;
+    }
+    if (holidayTypes.secondState.type === 'school') {
+      return `${baseClasses} bg-purple-100/80 text-purple-700 cursor-pointer ${focusClasses}`;
+    }
+    if (holidayTypes.secondState.type === 'bridge') {
+      return `${baseClasses} bg-orange-100/80 text-orange-700 cursor-pointer ${focusClasses}`;
     }
 
     if (isWeekendDay) {
@@ -543,7 +617,7 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
       return `${baseClasses} bg-neutral-100 cursor-pointer ${focusClasses}`;
     }
 
-    return `${baseClasses} text-neutral-900 hover:bg-neutral-100 cursor-pointer ${focusClasses}`;
+    return `${baseClasses} hover:bg-neutral-100 cursor-pointer ${focusClasses}`;
   };
 
   const getDaysInMonth = (date: Date) => {
@@ -566,10 +640,43 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
     }
 
     if (holidayTypes.firstState.holiday?.name) {
-      parts.push(`Feiertag: ${holidayTypes.firstState.holiday.name}`);
+      const holidayName = holidayTypes.firstState.holiday.name
+        .split(' ')
+        .map(word => {
+          // Capitalize first letter of specific words
+          if (['sommerferien', 'winterferien', 'osterferien', 'herbstferien', 'pfingstferien', 'weihnachtsferien'].includes(word.toLowerCase())) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+          }
+          // Capitalize state names
+          if (['baden-württemberg', 'bayern', 'berlin', 'brandenburg', 'bremen', 'hamburg', 'hessen', 'mecklenburg-vorpommern', 'niedersachsen', 'nordrhein-westfalen', 'rheinland-pfalz', 'saarland', 'sachsen', 'sachsen-anhalt', 'schleswig-holstein', 'thüringen'].includes(word.toLowerCase())) {
+            return word.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-');
+          }
+          return word;
+        })
+        .join(' ');
+
+      const prefix = holidayTypes.firstState.type === 'school' ? 'Schulferien:' : 'Feiertag:';
+      parts.push(`${prefix} ${holidayName}`);
     }
+
     if (holidayTypes.secondState.holiday?.name && holidayTypes.secondState.holiday.name !== holidayTypes.firstState.holiday?.name) {
-      parts.push(`Feiertag: ${holidayTypes.secondState.holiday.name}`);
+      const holidayName = holidayTypes.secondState.holiday.name
+        .split(' ')
+        .map(word => {
+          // Capitalize first letter of specific words
+          if (['sommerferien', 'winterferien', 'osterferien', 'herbstferien', 'pfingstferien', 'weihnachtsferien'].includes(word.toLowerCase())) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+          }
+          // Capitalize state names
+          if (['baden-württemberg', 'bayern', 'berlin', 'brandenburg', 'bremen', 'hamburg', 'hessen', 'mecklenburg-vorpommern', 'niedersachsen', 'nordrhein-westfalen', 'rheinland-pfalz', 'saarland', 'sachsen', 'sachsen-anhalt', 'schleswig-holstein', 'thüringen'].includes(word.toLowerCase())) {
+            return word.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-');
+          }
+          return word;
+        })
+        .join(' ');
+
+      const prefix = holidayTypes.secondState.type === 'school' ? 'Schulferien:' : 'Feiertag:';
+      parts.push(`${prefix} ${holidayName}`);
     }
 
     if (holidayTypes.firstState.type === 'bridge') {

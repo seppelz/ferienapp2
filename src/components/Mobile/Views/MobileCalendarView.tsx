@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MobileCalendar } from '../Calendar/MobileCalendar';
+import { MobileCalendarLegend } from '../Calendar/MobileCalendarLegend';
 import { Holiday, BridgeDay } from '../../../types/holiday';
 import { VacationPlan } from '../../../types/vacationPlan';
 import { isWithinInterval, isSameDay, min, max, addDays, isBefore, differenceInDays } from 'date-fns';
@@ -197,6 +198,12 @@ export const MobileCalendarView: React.FC<MobileCalendarViewProps> = ({
               }}
               vacationPlans={vacationPlans}
               initialDate={initialDate}
+            />
+            <MobileCalendarLegend 
+              currentMonth={month}
+              holidays={holidays}
+              schoolHolidays={holidays.filter(h => h.type === 'school')}
+              vacationPlans={vacationPlans}
             />
           </div>
         </div>

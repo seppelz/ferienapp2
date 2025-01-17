@@ -188,53 +188,59 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
     const isCurrentMonth = date.getMonth() === props.month.getMonth();
     const vacationInfo = props.getDateVacationInfo(date);
 
-    const baseClasses = "flex flex-col items-center justify-center w-12 h-11 text-sm transition-colors touch-manipulation";
-    const cursorClasses = props.isSelectingVacation && !isDisabled ? "cursor-pointer active:bg-gray-50" : "cursor-default";
-    const textColorClass = !isCurrentMonth ? "text-gray-400" : isDisabled ? "text-gray-300" : "text-gray-900";
+    const baseClasses = "flex flex-col items-center justify-center w-12 h-11 text-sm transition-all duration-200 ease-in-out touch-manipulation relative";
+    const cursorClasses = props.isSelectingVacation && !isDisabled 
+      ? "cursor-pointer hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm" 
+      : "cursor-default";
+    const textColorClass = !isCurrentMonth ? "text-gray-500" : isDisabled ? "text-gray-400" : "text-gray-900";
+    const focusClasses = "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 focus:z-10";
+    const todayClasses = isToday ? "ring-2 ring-blue-500 ring-offset-2 font-bold" : "";
     
     if (isDisabled) {
-      return `${baseClasses} ${textColorClass} ${cursorClasses}`;
+      return `${baseClasses} ${textColorClass} ${cursorClasses} opacity-50 ${focusClasses}`;
     }
 
     if (isSelected) {
-      const personColor = props.personId === 1 ? 'emerald' : 'cyan';
-      return `${baseClasses} bg-${personColor}-200 text-gray-900 active:bg-${personColor}-300 ${cursorClasses}`;
+      const personColor = props.personId === 1 ? 'emerald' : 'blue';
+      return `${baseClasses} bg-${personColor}-200 text-${personColor}-800 font-semibold shadow-md hover:shadow-lg 
+        ${cursorClasses} ${focusClasses} ${todayClasses}`;
     }
 
-    if (type === 'vacation') {
-      if (vacationInfo.isSharedVacation) {
-        return `${baseClasses} bg-gradient-to-br from-emerald-100 to-cyan-100 text-gray-900 ${cursorClasses}`;
+    // Build background classes based on all active states
+    let bgClasses = '';
+    let textColor = 'text-gray-900';
+
+    const states = [];
+    if (type === 'public') states.push('red');
+    if (type === 'school') states.push('purple');
+    if (type === 'bridge') states.push('orange');
+    
+    // Add vacation states with correct colors
+    if (vacationInfo.person1Vacation) states.push('emerald');
+    if (vacationInfo.person2Vacation) states.push('blue');
+
+    if (states.length > 1) {
+      // Multiple states - create gradient
+      bgClasses = `bg-gradient-to-r from-${states[0]}-100 to-${states[1]}-200`;
+      // Use more vibrant color for vacation states
+      if (states[0] === 'emerald' || states[0] === 'blue') {
+        textColor = `text-${states[0]}-800`;
+      } else {
+        textColor = `text-${states[0]}-700`;
       }
-      return `${baseClasses} ${holidayColors[props.personId === 1 ? 'person1' : 'person2'].vacation} text-gray-900 ${cursorClasses}`;
+    } else if (states.length === 1) {
+      // Single state - use more vibrant color for vacation states
+      const intensity = states[0] === 'emerald' || states[0] === 'blue' ? '200' : '100';
+      bgClasses = `bg-${states[0]}-${intensity}`;
+      textColor = states[0] === 'emerald' || states[0] === 'blue' 
+        ? `text-${states[0]}-800`
+        : `text-${states[0]}-700`;
     }
 
-    if (type === 'public') {
-      return `${baseClasses} ${holidayColors[props.personId === 1 ? 'person1' : 'person2'].holiday} text-white ${cursorClasses}`;
-    }
+    return `${baseClasses} ${bgClasses} ${textColor} font-semibold shadow-md hover:shadow-lg 
+      ${cursorClasses} ${focusClasses} ${todayClasses}`;
 
-    if (type === 'bridge') {
-      return `${baseClasses} ${holidayColors[props.personId === 1 ? 'person1' : 'person2'].bridge} text-white ${cursorClasses}`;
-    }
-
-    if (type === 'regional' || type === 'school') {
-      return `${baseClasses} ${holidayColors[props.personId === 1 ? 'person1' : 'person2'].school} text-white ${cursorClasses}`;
-    }
-
-    if (isWeekendDay) {
-      return `${baseClasses} ${textColorClass} active:bg-gray-100 ${cursorClasses}`;
-    }
-
-    return `${baseClasses} ${textColorClass} active:bg-gray-100 ${cursorClasses}`;
-  }, [
-    isDateDisabled,
-    isDateInRange,
-    getHolidayType,
-    today,
-    props.month,
-    props.getDateVacationInfo,
-    props.isSelectingVacation,
-    props.personId
-  ]);
+  }, [isDateDisabled, isDateInRange, getHolidayType, props.isSelectingVacation, props.getDateVacationInfo, props.month, props.personId, today]);
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, date: Date) => {
@@ -286,28 +292,29 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
 
   return (
     <div className="relative w-full">
-      <div className="select-none">
-        {/* Month Navigation - Reduced padding and size */}
+      <div className="select-none bg-white rounded-xl shadow-lg p-4">
+        {/* Month Navigation - Enhanced styling */}
         <div 
-          className="flex items-center justify-between mb-2 px-2"
+          className="flex items-center justify-between mb-4 px-2"
           role="toolbar"
           aria-label="Monatsnavigation"
         >
           <button
             onClick={() => handleMonthChange(-1)}
-            className="p-1.5 text-gray-600 active:bg-gray-100 rounded-full touch-manipulation 
+            className="p-2 text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-full touch-manipulation
+              transition-all duration-200 ease-in-out hover:scale-110 active:scale-95
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             aria-label="Vorheriger Monat"
             type="button"
             tabIndex={0}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
           <div 
-            className="text-base font-medium text-gray-900"
+            className="text-lg font-semibold text-gray-900 tracking-tight"
             role="heading"
             aria-level={2}
           >
@@ -316,13 +323,14 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
 
           <button
             onClick={() => handleMonthChange(1)}
-            className="p-1.5 text-gray-600 active:bg-gray-100 rounded-full touch-manipulation 
+            className="p-2 text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-full touch-manipulation
+              transition-all duration-200 ease-in-out hover:scale-110 active:scale-95
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             aria-label="Nächster Monat"
             type="button"
             tabIndex={0}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -340,13 +348,14 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
           }}
           className="w-full touch-none"
         >
-          <div className="grid grid-cols-7 bg-gray-100 rounded-lg overflow-hidden">
-            {/* Weekday headers - Reduced padding */}
+          <div className="grid grid-cols-7 bg-gray-50/50 rounded-lg overflow-hidden shadow-inner">
+            {/* Weekday headers - Enhanced styling */}
             <div className="contents" role="row">
               {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((day) => (
                 <div
                   key={day}
-                  className="bg-white py-1.5 text-xs font-medium text-gray-500 text-center border-b"
+                  className="bg-white/80 backdrop-blur-sm py-2 text-xs font-semibold text-gray-600 text-center border-b 
+                    border-gray-100 tracking-wider uppercase"
                   role="columnheader"
                   aria-label={day === 'Mo' ? 'Montag' : 
                              day === 'Di' ? 'Dienstag' :
@@ -438,9 +447,9 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
           </div>
         </animated.div>
 
-        {/* Swipe Hint */}
+        {/* Enhanced swipe hint */}
         <div 
-          className="text-center text-xs text-gray-500 mt-2"
+          className="text-center text-xs text-gray-500 mt-3 font-medium tracking-wide animate-pulse"
           aria-hidden="true"
         >
           ← Wischen zum Monatswechsel →
