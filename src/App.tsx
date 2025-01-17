@@ -6,12 +6,9 @@ import { PersonProvider } from './contexts/PersonContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 
 function App() {
-  // Use /app basename only in production
-  const basename = import.meta.env.DEV ? '' : '/app';
-  
   return (
     <HelmetProvider>
-      <Router basename={basename}>
+      <Router>
         <NotificationProvider>
           <PersonProvider>
             <Routes>
