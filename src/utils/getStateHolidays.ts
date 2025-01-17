@@ -1,5 +1,5 @@
 import { holidays } from '../data/holidays';
-import { Holiday } from '../types/Holiday';
+import { Holiday } from '../types/holiday';
 import { GermanState } from '../types/GermanState';
 
 export function getStateHolidays(state: GermanState, year: number): Holiday[] {

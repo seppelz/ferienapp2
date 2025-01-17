@@ -16,7 +16,7 @@ import { GermanState } from '../../../types/GermanState';
 import { VacationPlan } from '../../../types/vacationPlan';
 import { AnimatePresence, motion } from 'framer-motion';
 import { TutorialModal } from '../Tutorial/TutorialModal';
-import { ExportService } from '../../../services/exportService';
+import { exportService } from '../../../services/exportService';
 import { eachDayOfInterval, isWeekend, isSameDay } from 'date-fns';
 import { useFirstTimeUser } from '../../../hooks/useFirstTimeUser';
 
@@ -106,6 +106,15 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({
   const [showTutorial, setShowTutorial] = useState(false);
   const { isFirstTimeUser, markTutorialAsSeen } = useFirstTimeUser();
 
+  const getHolidayDate = (holiday: Holiday): Date => {
+    if ('date' in holiday && holiday.date) {
+      return new Date(holiday.date);
+    } else if ('start' in holiday && holiday.start) {
+      return new Date(holiday.start);
+    }
+    throw new Error('Invalid holiday date');
+  };
+
   // Show tutorial automatically for first-time users
   useEffect(() => {
     if (isFirstTimeUser) {
@@ -131,7 +140,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({
       // Required days are workdays that aren't public holidays
       const requiredDays = days.filter(d => 
         !isWeekend(d) && !holidays.some(h => 
-          h.type === 'public' && isSameDay(new Date(h.date), d)
+          h.type === 'public' && isSameDay(getHolidayDate(h), d)
         )
       ).length;
       
@@ -187,7 +196,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({
   };
 
   const handleExport = (type: 'ics' | 'hr' | 'celebration') => {
-    ExportService.exportVacationPlan(
+    exportService.exportVacationPlan(
       vacationPlans,
       holidays,
       personId,
@@ -215,6 +224,10 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({
   // Filter holidays by type for different views
   const publicHolidays = holidays.filter(h => h.type === 'public');
   const schoolHolidays = holidays.filter(h => h.type === 'school');
+
+  const isPublicHoliday = (date: Date) => {
+    return publicHolidays.some(h => isSameDay(getHolidayDate(h), date));
+  };
 
   // Define layout components
   const header = (

@@ -47,14 +47,31 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
     );
   };
 
+  const getHolidayInterval = (schoolHoliday: Holiday): Interval => {
+    if ('date' in schoolHoliday && schoolHoliday.date) {
+      const date = new Date(schoolHoliday.date);
+      return {
+        start: date,
+        end: date
+      };
+    } else if ('start' in schoolHoliday && 'end' in schoolHoliday && schoolHoliday.start && schoolHoliday.end) {
+      return {
+        start: new Date(schoolHoliday.start),
+        end: new Date(schoolHoliday.end)
+      };
+    }
+    throw new Error('Invalid holiday dates');
+  };
+
   const isInSchoolHolidays = (date: Date, holidayList: Holiday[]) => {
     return holidayList.some(holiday => {
       if (holiday.type === 'school') {
-        const schoolHoliday = holiday as MultiDayHoliday;
-        return isWithinInterval(date, { 
-          start: schoolHoliday.date, 
-          end: schoolHoliday.endDate 
-        });
+        try {
+          const interval = getHolidayInterval(holiday);
+          return isWithinInterval(date, interval);
+        } catch (e) {
+          return false;
+        }
       }
       return false;
     });
@@ -64,8 +81,12 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
     const baseClasses = `w-6 h-6 flex items-center justify-center text-xs select-none ${theme.calendar.day.base}`;
     const classes = [baseClasses];
     const isWeekendDay = isWeekend(date);
-    const isFirstStateHoliday = holidays.find(h => isSameDay(date, h.date));
-    const isSecondStateHoliday = secondStateHolidays.find(h => isSameDay(date, h.date));
+    const isFirstStateHoliday = holidays.find(h => 
+      h.date ? isSameDay(new Date(h.date), date) : false
+    );
+    const isSecondStateHoliday = secondStateHolidays.find(h => 
+      h.date ? isSameDay(new Date(h.date), date) : false
+    );
     const isFirstStateBridgeDay = bridgeDays.some(d => isSameDay(date, d));
     const isSecondStateBridgeDay = secondStateBridgeDays.some(d => isSameDay(date, d));
     const isFirstStateSchoolHoliday = isInSchoolHolidays(date, holidays);
@@ -119,8 +140,12 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
     const info: { title: string; details: string[] } = { title: '', details: [] };
     
     // Check holidays
-    const firstStateHoliday = holidays.find(h => isSameDay(new Date(h.date), date));
-    const secondStateHoliday = secondStateHolidays.find(h => isSameDay(new Date(h.date), date));
+    const firstStateHoliday = holidays.find(h => 
+      h.date ? isSameDay(new Date(h.date), date) : false
+    );
+    const secondStateHoliday = secondStateHolidays.find(h => 
+      h.date ? isSameDay(new Date(h.date), date) : false
+    );
     
     if (firstStateHoliday) {
       info.details.push(firstStateHoliday.name);

@@ -1,8 +1,8 @@
 import { VacationPlan } from '../types/vacationPlan';
 import { Holiday } from '../types/holiday';
-import { format, differenceInDays, eachDayOfInterval, isWeekend, isSameDay, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, differenceInDays, eachDayOfInterval, isWeekend, isSameDay, isWithinInterval } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { GermanState, stateNames } from '../types/GermanState';
 
@@ -14,48 +14,42 @@ interface ICSEvent {
   categories?: string[];
 }
 
-export class ExportService {
-  private static formatICSDate(date: Date): string {
-    return format(date, "yyyyMMdd'T'HHmmss'Z'");
+// Helper functions
+const getHolidayDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('start' in holiday && holiday.start) {
+    return new Date(holiday.start);
   }
+  throw new Error('Invalid holiday date');
+};
 
-  private static createICSEvent(event: ICSEvent): string {
-    const lines: string[] = [
-      'BEGIN:VEVENT',
-      `DTSTART:${this.formatICSDate(event.start)}`,
-      `DTEND:${this.formatICSDate(event.end)}`,
-      `SUMMARY:${event.summary}`,
-      `UID:${Math.random().toString(36).substring(2)}@holiday-planner.app`
-    ];
+const getHolidayEndDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('end' in holiday && holiday.end) {
+    return new Date(holiday.end);
+  }
+  return getHolidayDate(holiday);
+};
 
-    if (event.description) {
-      lines.push(`DESCRIPTION:${event.description}`);
+const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
+  try {
+    if ('date' in holiday && holiday.date) {
+      return isSameDay(new Date(holiday.date), date);
+    } else if ('start' in holiday && holiday.start && holiday.end) {
+      const start = new Date(holiday.start);
+      const end = new Date(holiday.end);
+      return isWithinInterval(date, { start, end });
     }
-
-    if (event.categories && event.categories.length > 0) {
-      lines.push(`CATEGORIES:${event.categories.join(',')}`);
-    }
-
-    lines.push('END:VEVENT');
-    return lines.join('\r\n');
+    return false;
+  } catch {
+    return false;
   }
+};
 
-  static createICSFile(events: ICSEvent[]): string {
-    const header = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Holiday Planner//NONSGML v1.0//EN',
-      'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH'
-    ].join('\r\n');
-
-    const footer = 'END:VCALENDAR';
-
-    const eventStrings = events.map(event => this.createICSEvent(event));
-    return `${header}\r\n${eventStrings.join('\r\n')}\r\n${footer}`;
-  }
-
-  private static calculateVacationStats(vacationPlans: VacationPlan[], holidays: Holiday[]) {
+export const exportService = {
+  calculateVacationStats(vacationPlans: VacationPlan[], holidays: Holiday[]) {
     let totalDays = 0;
     let workDays = 0;
     let weekendDays = 0;
@@ -70,7 +64,7 @@ export class ExportService {
       days.forEach(date => {
         if (isWeekend(date)) {
           weekendDays++;
-        } else if (holidays.some(h => h.type === 'public' && isSameDay(new Date(h.date), date))) {
+        } else if (holidays.some(h => h.type === 'public' && isHolidayOnDate(h, date))) {
           holidayDays++;
         } else {
           workDays++;
@@ -85,50 +79,23 @@ export class ExportService {
       holidayDays,
       efficiency: totalDays / workDays
     };
-  }
+  },
 
-  static async downloadPDF(pdf: jsPDF, filename: string) {
-    pdf.save(filename);
-  }
-
-  private static createPDFWithFont(): jsPDF {
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      filters: ["ASCIIHexEncode"]
-    });
-
-    // Add the font that supports German characters
-    pdf.addFont('/fonts/Helvetica.ttf', 'Helvetica', 'normal');
-    pdf.setFont('Helvetica');
-    
-    return pdf;
-  }
-
-  static createHRDocument(
+  createHRDocument(
     vacationPlans: VacationPlan[],
     personId: 1 | 2,
     holidays: Holiday[]
   ): jsPDF {
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
+    const pdf = new jsPDF();
     const stats = this.calculateVacationStats(vacationPlans, holidays);
 
-    // Header
     pdf.setFontSize(20);
     pdf.text('Urlaubsantrag', 105, 20, { align: 'center' });
 
-    // Personal Info
     pdf.setFontSize(12);
     pdf.text(`Person: ${personId}`, 20, 40);
     pdf.text(`Verfügbare Urlaubstage: ${stats.workDays}`, 20, 50);
 
-    // Vacation Table
     const tableData = vacationPlans
       .filter(v => v.isVisible)
       .map(vacation => [
@@ -142,13 +109,9 @@ export class ExportService {
       head: [['Von', 'Bis', 'Dauer']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [66, 139, 202] },
-      styles: {
-        font: 'helvetica'
-      }
+      headStyles: { fillColor: [66, 139, 202] }
     });
 
-    // Signature fields
     const finalY = (pdf as any).lastAutoTable.finalY + 20;
     pdf.text('Unterschrift Mitarbeiter:', 20, finalY);
     pdf.text('_____________________', 20, finalY + 10);
@@ -156,9 +119,9 @@ export class ExportService {
     pdf.text('_____________________', 120, finalY + 10);
 
     return pdf;
-  }
+  },
 
-  static createCelebrationDocument(
+  createCelebrationDocument(
     vacationPlans: VacationPlan[],
     personId: 1 | 2,
     holidays: Holiday[],
@@ -170,19 +133,13 @@ export class ExportService {
       showSharedAnalysis: boolean;
     }
   ): jsPDF {
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
+    const pdf = new jsPDF();
+    let currentY = 20;
 
-    // Header with title
     pdf.setFontSize(24);
-    pdf.text('Urlaubsplanung 2025', 105, 20, { align: 'center' });
+    pdf.text('Urlaubsplanung 2025', 105, currentY, { align: 'center' });
+    currentY += 20;
 
-    let currentY = 30;
-
-    // Show state information
     pdf.setFontSize(12);
     pdf.text(`Person 1: ${stateNames[options.person1State]}`, 20, currentY);
     if (options.showSharedAnalysis && options.person2State) {
@@ -190,73 +147,51 @@ export class ExportService {
     }
     currentY += 15;
 
-    // Person 1 Vacation Table
-    pdf.setFontSize(14);
-    pdf.text('Urlaub Person 1', 105, currentY, { align: 'center' });
-    currentY += 10;
-
-    const person1Vacations = vacationPlans
-      .filter(v => v.isVisible)
-      .sort((a, b) => a.start.getTime() - b.start.getTime());
-
-    if (person1Vacations.length > 0) {
-      (pdf as any).autoTable({
-        startY: currentY,
-        head: [['Von', 'Bis', 'Dauer']],
-        body: person1Vacations.map(vacation => [
-          format(vacation.start, 'dd.MM.yyyy', { locale: de }),
-          format(vacation.end, 'dd.MM.yyyy', { locale: de }),
-          `${differenceInDays(vacation.end, vacation.start) + 1} Tage`
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [46, 204, 113] }, // Green for Person 1
-        styles: { fontSize: 10 }
-      });
-      currentY = (pdf as any).lastAutoTable.finalY + 15;
-    } else {
-      pdf.setFontSize(10);
-      pdf.text('Keine Urlaubstage geplant', 20, currentY);
-      currentY += 15;
-    }
-
-    // Person 2 Vacation Table (if exists)
-    if (options.showSharedAnalysis && otherPersonVacations.length > 0) {
+    const renderVacationTable = (
+      title: string,
+      vacations: VacationPlan[],
+      fillColor: number[],
+      y: number
+    ) => {
       pdf.setFontSize(14);
-      pdf.text('Urlaub Person 2', 105, currentY, { align: 'center' });
-      currentY += 10;
+      pdf.text(title, 105, y, { align: 'center' });
 
-      const person2Vacations = otherPersonVacations
+      const filteredVacations = vacations
         .filter(v => v.isVisible)
         .sort((a, b) => a.start.getTime() - b.start.getTime());
 
-      if (person2Vacations.length > 0) {
+      if (filteredVacations.length > 0) {
         (pdf as any).autoTable({
-          startY: currentY,
+          startY: y + 10,
           head: [['Von', 'Bis', 'Dauer']],
-          body: person2Vacations.map(vacation => [
+          body: filteredVacations.map(vacation => [
             format(vacation.start, 'dd.MM.yyyy', { locale: de }),
             format(vacation.end, 'dd.MM.yyyy', { locale: de }),
             `${differenceInDays(vacation.end, vacation.start) + 1} Tage`
           ]),
           theme: 'grid',
-          headStyles: { fillColor: [52, 152, 219] }, // Blue for Person 2
+          headStyles: { fillColor },
           styles: { fontSize: 10 }
         });
-        currentY = (pdf as any).lastAutoTable.finalY + 15;
-      } else {
-        pdf.setFontSize(10);
-        pdf.text('Keine Urlaubstage geplant', 20, currentY);
-        currentY += 15;
+        return (pdf as any).lastAutoTable.finalY + 15;
       }
+      
+      pdf.setFontSize(10);
+      pdf.text('Keine Urlaubstage geplant', 20, y + 10);
+      return y + 25;
+    };
+
+    currentY = renderVacationTable('Urlaub Person 1', vacationPlans, [46, 204, 113], currentY);
+
+    if (options.showSharedAnalysis && otherPersonVacations.length > 0) {
+      currentY = renderVacationTable('Urlaub Person 2', otherPersonVacations, [52, 152, 219], currentY);
     }
 
-    // Shared Vacation Periods
     if (options.showSharedAnalysis) {
       pdf.setFontSize(14);
       pdf.text('Gemeinsame Urlaubszeiten', 105, currentY, { align: 'center' });
-      currentY += 10;
 
-      const sharedPeriods = vacationPlans.reduce((periods: any[], vacation) => {
+      const sharedPeriods = vacationPlans.reduce((periods: { start: Date; end: Date }[], vacation) => {
         if (!vacation.isVisible) return periods;
         
         otherPersonVacations.forEach(otherVacation => {
@@ -271,11 +206,11 @@ export class ExportService {
         });
         
         return periods;
-      }, []).sort((a: any, b: any) => a.start.getTime() - b.start.getTime());
+      }, []).sort((a, b) => a.start.getTime() - b.start.getTime());
 
       if (sharedPeriods.length > 0) {
         (pdf as any).autoTable({
-          startY: currentY,
+          startY: currentY + 10,
           head: [['Von', 'Bis', 'Dauer']],
           body: sharedPeriods.map(period => [
             format(period.start, 'dd.MM.yyyy', { locale: de }),
@@ -283,99 +218,62 @@ export class ExportService {
             `${differenceInDays(period.end, period.start) + 1} Tage`
           ]),
           theme: 'grid',
-          headStyles: { fillColor: [255, 99, 132] }, // Pink for shared time
+          headStyles: { fillColor: [255, 99, 132] },
           styles: { fontSize: 10 }
         });
         currentY = (pdf as any).lastAutoTable.finalY + 15;
-      } else {
-        pdf.setFontSize(10);
-        pdf.text('Keine gemeinsamen Urlaubszeiten', 20, currentY);
-        currentY += 15;
       }
     }
 
-    // Statistics Section
-    pdf.setFontSize(16);
-    pdf.text('Urlaubsstatistik', 105, currentY, { align: 'center' });
-    currentY += 15;
-
-    // Person 1 Statistics
-    const stats1 = this.calculateVacationStats(vacationPlans, holidays);
-    pdf.setFontSize(12);
-    pdf.text('Person 1:', 20, currentY);
-    currentY += 10;
-
-    (pdf as any).autoTable({
-      startY: currentY,
-      head: [['Urlaubstage', 'Wochenenden', 'Feiertage', 'Gesamt']],
-      body: [[
-        `${stats1.workDays}`,
-        `${stats1.weekendDays}`,
-        `${stats1.holidayDays}`,
-        `${stats1.totalDays}`
-      ]],
-      theme: 'grid',
-      headStyles: { fillColor: [46, 204, 113] },
-      styles: { fontSize: 10 }
-    });
-    currentY = (pdf as any).lastAutoTable.finalY + 15;
-
-    // Person 2 Statistics
-    if (options.showSharedAnalysis) {
-      const stats2 = this.calculateVacationStats(otherPersonVacations, otherPersonHolidays);
-      pdf.setFontSize(12);
-      pdf.text('Person 2:', 20, currentY);
-      currentY += 10;
-
-      (pdf as any).autoTable({
-        startY: currentY,
-        head: [['Urlaubstage', 'Wochenenden', 'Feiertage', 'Gesamt']],
-        body: [[
-          `${stats2.workDays}`,
-          `${stats2.weekendDays}`,
-          `${stats2.holidayDays}`,
-          `${stats2.totalDays}`
-        ]],
-        theme: 'grid',
-        headStyles: { fillColor: [52, 152, 219] },
-        styles: { fontSize: 10 }
-      });
-    }
-
     return pdf;
-  }
+  },
 
-  static exportToICS(
-    vacationPlans: VacationPlan[],
-    holidays: Holiday[],
-    personId: 1 | 2
-  ): string {
-    const events: ICSEvent[] = vacationPlans
-      .filter(vacation => vacation.isVisible)
-      .map(vacation => ({
-        start: vacation.start,
-        end: vacation.end,
-        summary: `Urlaub Person ${personId}`,
-        description: vacation.efficiency ? 
-          `Urlaubstage: ${vacation.efficiency.requiredDays}, Freie Tage: ${vacation.efficiency.gainedDays}` : 
-          undefined,
-        categories: ['Urlaub']
-      }));
+  exportToICS(vacations: VacationPlan[], holidays: Holiday[], state: GermanState): string {
+    const events: string[] = [];
+    const now = new Date();
 
-    return this.createICSFile(events);
-  }
+    events.push(
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Urlaubsplaner//DE',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH'
+    );
 
-  private static downloadFile(content: string, filename: string, type: string) {
-    const blob = new Blob([content], { type });
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+    // Add vacation events
+    vacations.forEach(vacation => {
+      events.push(
+        'BEGIN:VEVENT',
+        `DTSTAMP:${format(now, "yyyyMMdd'T'HHmmss'Z'")}`,
+        `DTSTART;VALUE=DATE:${format(vacation.start, 'yyyyMMdd')}`,
+        `DTEND;VALUE=DATE:${format(vacation.end, 'yyyyMMdd')}`,
+        `SUMMARY:Urlaub ${state}`,
+        `DESCRIPTION:Geplanter Urlaub in ${state}`,
+        'END:VEVENT'
+      );
+    });
 
-  static async exportVacationPlan(
+    // Add holiday events
+    holidays.forEach(holiday => {
+      const start = getHolidayDate(holiday);
+      const end = getHolidayEndDate(holiday);
+
+      events.push(
+        'BEGIN:VEVENT',
+        `DTSTAMP:${format(now, "yyyyMMdd'T'HHmmss'Z'")}`,
+        `DTSTART;VALUE=DATE:${format(start, 'yyyyMMdd')}`,
+        `DTEND;VALUE=DATE:${format(end, 'yyyyMMdd')}`,
+        `SUMMARY:${holiday.name} (${holiday.type === 'public' ? 'Feiertag' : 'Schulferien'})`,
+        `DESCRIPTION:${holiday.details?.description || ''}`,
+        'END:VEVENT'
+      );
+    });
+
+    events.push('END:VCALENDAR');
+    return events.join('\r\n');
+  },
+
+  async exportVacationPlan(
     vacations: VacationPlan[],
     holidays: Holiday[],
     personId: 1 | 2,
@@ -386,10 +284,20 @@ export class ExportService {
       person2State?: GermanState;
     }
   ) {
+    const downloadFile = (content: string, filename: string, type: string) => {
+      const blob = new Blob([content], { type });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
     switch (type) {
       case 'ics':
-        const icsContent = this.exportToICS(vacations, holidays, personId);
-        this.downloadFile(icsContent, 'urlaub.ics', 'text/calendar');
+        const icsContent = this.exportToICS(vacations, holidays, options?.person1State || GermanState.BE);
+        downloadFile(icsContent, 'urlaub.ics', 'text/calendar');
         break;
       case 'hr':
         const hrPdf = this.createHRDocument(vacations, personId, holidays);
@@ -403,12 +311,13 @@ export class ExportService {
           otherPersonVacations,
           [],
           {
-            person1State: personId === 1 ? GermanState.BE : GermanState.BE,
-            showSharedAnalysis: false
+            person1State: options?.person1State || GermanState.BE,
+            person2State: options?.person2State,
+            showSharedAnalysis: !!options?.person2State
           }
         );
         celebrationPdf.save('urlaubsplanung.pdf');
         break;
     }
   }
-} 
+}; 

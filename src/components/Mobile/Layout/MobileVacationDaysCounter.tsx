@@ -20,6 +20,21 @@ export const MobileVacationDaysCounter: React.FC<MobileVacationDaysCounterProps>
   holidays,
   otherPersonVacations
 }) => {
+  const getHolidayDate = (holiday: Holiday): Date => {
+    if ('date' in holiday && holiday.date) {
+      return new Date(holiday.date);
+    } else if ('start' in holiday && holiday.start) {
+      return new Date(holiday.start);
+    }
+    throw new Error('Invalid holiday date');
+  };
+
+  const isPublicHoliday = (date: Date) => {
+    return holidays.some(h => 
+      h.type === 'public' && isSameDay(getHolidayDate(h), date)
+    );
+  };
+
   // Calculate used vacation days
   const usedDays = vacationPlans.reduce((total, vacation) => {
     if (!vacation.isVisible) return total;
@@ -31,7 +46,7 @@ export const MobileVacationDaysCounter: React.FC<MobileVacationDaysCounterProps>
       
       // Skip public holidays
       const isPublicHoliday = holidays.some(h => 
-        h.type === 'public' && isSameDay(new Date(h.date), date)
+        h.type === 'public' && isSameDay(getHolidayDate(h), date)
       );
       
       return !isPublicHoliday;

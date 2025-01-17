@@ -17,6 +17,21 @@ export const MobileBottomStats: React.FC<MobileBottomStatsProps> = ({
 }) => {
   const colors = personId === 1 ? holidayColors.person1.ui : holidayColors.person2.ui;
   
+  const getHolidayDate = (holiday: Holiday): Date => {
+    if ('date' in holiday && holiday.date) {
+      return new Date(holiday.date);
+    } else if ('start' in holiday && holiday.start) {
+      return new Date(holiday.start);
+    }
+    throw new Error('Invalid holiday date');
+  };
+
+  const isPublicHoliday = (date: Date) => {
+    return holidays.some(h => 
+      h.type === 'public' && isSameDay(getHolidayDate(h), date)
+    );
+  };
+
   // Calculate vacation days and additional free days
   const stats = vacationPlans.reduce((acc, vacation) => {
     if (!vacation.isVisible) return acc;
@@ -26,18 +41,13 @@ export const MobileBottomStats: React.FC<MobileBottomStatsProps> = ({
     // Count workdays that are not holidays as vacation days
     const vacationDays = allDays.filter(date => {
       if (isWeekend(date)) return false;
-      const isHoliday = holidays.some(h => 
-        h.type === 'public' && isSameDay(new Date(h.date), date)
-      );
-      return !isHoliday;
+      return !isPublicHoliday(date);
     }).length;
 
     // Count weekends and holidays as additional free days
     const additionalFreeDays = allDays.filter(date => {
       if (isWeekend(date)) return true;
-      return holidays.some(h => 
-        h.type === 'public' && isSameDay(new Date(h.date), date)
-      );
+      return isPublicHoliday(date);
     }).length;
 
     return {

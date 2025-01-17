@@ -3,8 +3,8 @@ import { format, eachDayOfInterval, isWeekend, isWithinInterval, isSameDay, addD
 import { de } from 'date-fns/locale';
 import { VacationPlan } from '../types/vacationPlan';
 import { GermanState } from '../types/GermanState';
-import { Holiday } from '../types/holiday';
-import { analyzeVacationOpportunities } from '../utils/smartVacationAnalysis';
+import { Holiday, BridgeDay } from '../types/holiday';
+import { analyzeVacationOpportunities, VacationRecommendation } from '../utils/smartVacationAnalysis';
 import { useTheme } from '../hooks/useTheme';
 import { calculateVacationDays } from '../utils/vacationCalculator';
 import styles from './VacationList.module.css';
@@ -16,7 +16,7 @@ interface VacationListProps {
   onRemove: (id: string) => void;
   personId?: 1 | 2;
   holidays?: Holiday[];
-  bridgeDays?: Holiday[];
+  bridgeDays?: BridgeDay[];
   onAddVacation?: (start: Date, end: Date) => void;
   availableVacationDays?: number;
   state: GermanState;
@@ -40,9 +40,11 @@ const calculateVacationStats = (vacation: VacationPlan, holidays: Holiday[]) => 
     const allDays = eachDayOfInterval({ start: vacation.start, end: vacation.end });
     const requiredDays = allDays.reduce((count, d) => {
       if (isWeekend(d)) return count;
-      const isPublicHoliday = holidays.some(h => 
-        h.type === 'public' && isSameDay(h.date, d)
-      );
+      const isPublicHoliday = holidays.some(h => {
+        if (h.type !== 'public' || !h.date) return false;
+        const holidayDate = new Date(h.date);
+        return isValidDate(holidayDate) ? isSameDay(holidayDate, d) : false;
+      });
       return isPublicHoliday ? count : count + 1;
     }, 0);
 
@@ -52,14 +54,22 @@ const calculateVacationStats = (vacation: VacationPlan, holidays: Holiday[]) => 
 
     // Look backwards for connected free days
     let currentDay = subDays(vacation.start, 1);
-    while (isWeekend(currentDay) || holidays.some(h => h.type === 'public' && isSameDay(h.date, currentDay))) {
+    while (isWeekend(currentDay) || holidays.some(h => {
+      if (h.type !== 'public' || !h.date) return false;
+      const holidayDate = new Date(h.date);
+      return isValidDate(holidayDate) ? isSameDay(holidayDate, currentDay) : false;
+    })) {
       displayStart = currentDay;
       currentDay = subDays(currentDay, 1);
     }
 
     // Look forwards for connected free days
     currentDay = addDays(vacation.end, 1);
-    while (isWeekend(currentDay) || holidays.some(h => h.type === 'public' && isSameDay(h.date, currentDay))) {
+    while (isWeekend(currentDay) || holidays.some(h => {
+      if (h.type !== 'public' || !h.date) return false;
+      const holidayDate = new Date(h.date);
+      return isValidDate(holidayDate) ? isSameDay(holidayDate, currentDay) : false;
+    })) {
       displayEnd = currentDay;
       currentDay = addDays(currentDay, 1);
     }
@@ -99,7 +109,7 @@ export const VacationList: React.FC<VacationListProps> = ({
   state,
 }) => {
   const theme = useTheme();
-  const { usedDays, gainedDays } = calculateVacationDays(vacations, holidays);
+  const { usedDays, gainedDays } = calculateVacationDays(vacations);
   const isOverLimit = usedDays > availableVacationDays;
   
   // Calculate total efficiency
@@ -150,8 +160,8 @@ export const VacationList: React.FC<VacationListProps> = ({
 
   const enhancedRecommendations = useMemo(() => bestCombinations.map(rec => {
     const includesBridgeDay = bridgeDays?.some(bd => 
-      isSameDay(bd.date instanceof Date ? bd.date : new Date(bd.date), rec.startDate) ||
-      isSameDay(bd.date instanceof Date ? bd.date : new Date(bd.date), rec.endDate)
+      isSameDay(new Date(bd.date), rec.startDate) ||
+      isSameDay(new Date(bd.date), rec.endDate)
     );
     
     return {
@@ -192,12 +202,15 @@ export const VacationList: React.FC<VacationListProps> = ({
           </h4>
           <div className="space-y-0.5">
             {enhancedRecommendations.map((rec, index) => {
-              if (!isValidDate(rec.startDate) || !isValidDate(rec.endDate)) return null;
+              if (!rec.startDate || !rec.endDate) return null;
+              const startDate = new Date(rec.startDate);
+              const endDate = new Date(rec.endDate);
+              if (!isValidDate(startDate) || !isValidDate(endDate)) return null;
 
               return (
                 <button
                   key={index}
-                  className={`${theme.card.interactive} w-full text-left py-1.5 px-3 ${
+                  className={`${theme.card.base} ${theme.card.hover} w-full text-left py-1.5 px-3 ${
                     rec.includesBridgeDay ? 'bg-emerald-50' : ''
                   }`}
                   onClick={() => handleRecommendationClick(rec)}
@@ -208,7 +221,7 @@ export const VacationList: React.FC<VacationListProps> = ({
                     <span className={`${theme.text.body} text-sm`}>
                       {rec.displayRange}
                     </span>
-                    <span className={`${theme.text.secondary} text-sm ml-2`}>
+                    <span className={`${theme.text.body} text-sm ml-2`}>
                       {rec.efficiencyDisplay}
                     </span>
                   </div>

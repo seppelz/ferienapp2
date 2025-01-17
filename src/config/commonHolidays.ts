@@ -1,4 +1,4 @@
-import { Holiday } from './types/Holiday';
+import { Holiday } from '../types/holiday';
 
 export const commonHolidays: Record<number, Holiday[]> = {
   2024: [

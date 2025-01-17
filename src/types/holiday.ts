@@ -1,29 +1,38 @@
 import { GermanState } from './GermanState';
 
-export type HolidayType = 'public' | 'regional' | 'bridge' | 'school';
+export type HolidayType = 'public' | 'school' | 'regional' | 'bridge' | 'optional';
 
 export interface BaseHoliday {
   name: string;
-  state: GermanState;
+  state?: GermanState;
+  type: HolidayType;
+  details?: {
+    description: string;
+    traditions?: string[];
+    locations?: string[];
+    culturalSignificance?: string;
+    activities?: string[];
+  };
+  isRegional?: boolean;
 }
 
 export interface SingleDayHoliday extends BaseHoliday {
-  date: Date;
-  type: 'public' | 'regional' | 'bridge';
-  endDate?: never;
+  date: string;
+  start?: never;
+  end?: never;
 }
 
 export interface MultiDayHoliday extends BaseHoliday {
-  date: Date;
-  endDate: Date;
-  type: 'school';
+  date?: never;
+  start: string;
+  end: string;
 }
 
 export type Holiday = SingleDayHoliday | MultiDayHoliday;
 
 export interface VacationPlan {
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   id: string;
   state: GermanState;
   isVisible?: boolean;
@@ -42,13 +51,13 @@ export interface BridgeDay extends SingleDayHoliday {
   totalDaysOff: number;
   efficiency: number;
   pattern: string;
-  periodStart: Date;
-  periodEnd: Date;
+  periodStart: string;
+  periodEnd: string;
 }
 
 export interface VacationPeriod {
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   holidays: Holiday[];
   bridgeDays: BridgeDay[];
   requiredVacationDays: number;
@@ -72,23 +81,8 @@ export interface RawPublicHoliday extends RawHolidayDate {
 }
 
 export interface HolidayData {
-  schoolHolidays: Record<number, Record<GermanState, RawSchoolHoliday[]>>;
-  publicHolidays: Record<number, Record<GermanState | 'ALL', RawPublicHoliday[]>>;
-}
-
-export interface Holiday {
-  name: string;
-  date?: string;
-  start?: string;
-  end?: string;
-  type?: 'public' | 'school';
-  isRegional?: boolean;
-  details?: {
-    description: string;
-    traditions?: string[];
-    locations?: string[];
-    culturalSignificance?: string;
-  };
+  schoolHolidays: Record<string, Record<GermanState | string, RawSchoolHoliday[]>>;
+  publicHolidays: Record<string, Record<GermanState | 'ALL' | string, RawPublicHoliday[]>>;
 }
 
 export interface SeasonalTradition {
@@ -101,4 +95,5 @@ export interface HolidayDetails {
   traditions?: string[];
   locations?: string[];
   culturalSignificance?: string;
-}
+  familyActivities?: string[];
+} 

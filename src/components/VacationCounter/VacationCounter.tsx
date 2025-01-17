@@ -21,7 +21,13 @@ export const VacationCounter: React.FC<VacationCounterProps> = ({ holidays, pers
 
   const bridgeDays = holidays.reduce((total, holiday) => {
     if (holiday.type === 'bridge') {
-      return total + differenceInBusinessDays(new Date(holiday.endDate!), new Date(holiday.date)) + 1;
+      if ('date' in holiday && holiday.date) {
+        const startDate = new Date(holiday.date);
+        const endDate = new Date(holiday.date);
+        return total + 1;
+      } else if ('start' in holiday && 'end' in holiday && holiday.start && holiday.end) {
+        return total + differenceInBusinessDays(new Date(holiday.end), new Date(holiday.start)) + 1;
+      }
     }
     return total;
   }, 0);
@@ -42,4 +48,15 @@ export const VacationCounter: React.FC<VacationCounterProps> = ({ holidays, pers
       </div>
     </div>
   );
+};
+
+const calculateVacationDays = (holidays: Holiday[]): number => {
+  return holidays.reduce((total, holiday) => {
+    if ('date' in holiday && holiday.date) {
+      return total + 1;
+    } else if ('start' in holiday && 'end' in holiday && holiday.start && holiday.end) {
+      return total + differenceInBusinessDays(new Date(holiday.end), new Date(holiday.start)) + 1;
+    }
+    return total;
+  }, 0);
 }; 

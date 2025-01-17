@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExportService } from '../../../services/exportService';
+import { exportService } from '../../../services/exportService';
 import { VacationPlan } from '../../../types/vacationPlan';
 import { Holiday } from '../../../types/holiday';
 import { MobileExportModal } from '../Export/MobileExportModal';
@@ -22,7 +22,7 @@ export const MobileActionBar: React.FC<MobileActionBarProps> = ({
   const [showExportModal, setShowExportModal] = useState(false);
 
   const handleExport = (type: 'ics' | 'hr' | 'celebration') => {
-    ExportService.exportVacationPlan(
+    exportService.exportVacationPlan(
       vacationPlans,
       holidays,
       personId,

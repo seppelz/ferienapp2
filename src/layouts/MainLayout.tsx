@@ -13,12 +13,68 @@ import { VacationPlan } from '../types/vacationPlan';
 import { VacationEfficiencyInsights } from '../components/VacationEfficiencyInsights';
 import { AppWrapper } from '../components/AppWrapper';
 import { MobileExportModal } from '../components/Mobile/Export/MobileExportModal';
-import { ExportService } from '../services/exportService';
+import { exportService } from '../services/exportService';
 import { TutorialModal } from '../components/Mobile/Tutorial/TutorialModal';
 import { DesktopEfficiencyScore } from '../components/Desktop/DesktopEfficiencyScore';
 import { useFirstTimeUser } from '../hooks/useFirstTimeUser';
 import { useTheme } from '../hooks/useTheme';
 import { AppNavbar } from '../components/Navigation/AppNavbar';
+import { parseDateString } from '../utils/dateUtils';
+import { getHolidayDate, getHolidayEndDate, isHolidayOnDate } from '../services/bridgeDayService';
+
+interface Person {
+  vacationPlans: VacationPlan[];
+  selectedState: GermanState;
+  availableVacationDays?: number;
+}
+
+interface HolidayData {
+  person1: {
+    holidays: Holiday[];
+  };
+  person2?: {
+    holidays: Holiday[];
+  };
+}
+
+interface ThemeText {
+  heading: string;
+  body: string;
+  small: string;
+  muted: string;
+  secondary: string;
+}
+
+interface Theme {
+  text: ThemeText;
+  card: {
+    base: string;
+  };
+  button: {
+    base: string;
+  };
+}
+
+const theme: Theme = {
+  text: {
+    heading: 'text-gray-900',
+    body: 'text-gray-700',
+    small: 'text-gray-500',
+    muted: 'text-gray-400',
+    secondary: 'text-gray-400'
+  },
+  card: {
+    base: 'bg-white rounded-lg shadow-sm'
+  },
+  button: {
+    base: 'px-4 py-2 rounded-lg transition-colors'
+  }
+};
+
+// Helper function to get theme text class
+const getThemeTextClass = (key: keyof ThemeText): string => {
+  return theme.text[key];
+};
 
 // Helper function to download files
 const downloadFile = (content: string, filename: string, type: string) => {
@@ -33,40 +89,35 @@ const downloadFile = (content: string, filename: string, type: string) => {
   window.URL.revokeObjectURL(url);
 };
 
+// Calculate required days between two dates
+const calculateRequiredDays = (start: Date, end: Date, holidays: Holiday[]): number => {
+  const allDays = eachDayOfInterval({ start, end });
+  return allDays.reduce((count, d) => {
+    if (isWeekend(d)) return count;
+    const isPublicHoliday = holidays.some(h => 
+      h.type === 'public' && isHolidayOnDate(h, d)
+    );
+    return isPublicHoliday ? count : count + 1;
+  }, 0);
+};
+
 // Generate ICS calendar data
-const generateICSData = (persons: { person1: any; person2: any }) => {
-  const events: Array<{
-    start: Date;
-    end: Date;
-    summary: string;
-    description: string;
-  }> = [];
+const generateICSData = ({ person1, person2, holidayData }: { 
+  person1: Person; 
+  person2?: Person | null;
+  holidayData: HolidayData;
+}): string => {
+  const vacationPlans: VacationPlan[] = [
+    ...person1.vacationPlans,
+    ...(person2?.vacationPlans || [])
+  ];
 
-  // Add person 1 vacations
-  if (persons.person1?.vacationPlans) {
-    persons.person1.vacationPlans.forEach((vacation: VacationPlan) => {
-      events.push({
-        start: vacation.start,
-        end: vacation.end,
-        summary: 'Urlaub Person 1',
-        description: `Urlaub in ${stateNames[vacation.state]}`
-      });
-    });
-  }
+  const holidays: Holiday[] = [
+    ...holidayData.person1.holidays,
+    ...(holidayData.person2?.holidays || [])
+  ];
 
-  // Add person 2 vacations
-  if (persons.person2?.vacationPlans) {
-    persons.person2.vacationPlans.forEach((vacation: VacationPlan) => {
-      events.push({
-        start: vacation.start,
-        end: vacation.end,
-        summary: 'Urlaub Person 2',
-        description: `Urlaub in ${stateNames[vacation.state]}`
-      });
-    });
-  }
-
-  return ExportService.createICSFile(events);
+  return exportService.exportToICS(vacationPlans, holidays, person1.selectedState);
 };
 
 // Generate HR format data
@@ -81,8 +132,8 @@ const generateHRData = (persons: { person1: any; person2: any }) => {
     lines.push('\nPerson 1:');
     persons.person1.vacationPlans.forEach((vacation: VacationPlan) => {
       lines.push(
-        `Von: ${formatHRDate(vacation.start)}`,
-        `Bis: ${formatHRDate(vacation.end)}`,
+        `Von: ${formatHRDate(new Date(vacation.start))}`,
+        `Bis: ${formatHRDate(new Date(vacation.end))}`,
         `Bundesland: ${stateNames[vacation.state]}`,
         ''
       );
@@ -94,8 +145,8 @@ const generateHRData = (persons: { person1: any; person2: any }) => {
     lines.push('\nPerson 2:');
     persons.person2.vacationPlans.forEach((vacation: VacationPlan) => {
       lines.push(
-        `Von: ${formatHRDate(vacation.start)}`,
-        `Bis: ${formatHRDate(vacation.end)}`,
+        `Von: ${formatHRDate(new Date(vacation.start))}`,
+        `Bis: ${formatHRDate(new Date(vacation.end))}`,
         `Bundesland: ${stateNames[vacation.state]}`,
         ''
       );
@@ -116,7 +167,7 @@ const generateHolidayData = (holidays1: Holiday[], holidays2: Holiday[]) => {
   lines.push('\nPerson 1:');
   holidays1.forEach(holiday => {
     lines.push(
-      `${formatHolidayDate(new Date(holiday.date))} - ${holiday.name}`,
+      `${formatHolidayDate(getHolidayDate(holiday))} - ${holiday.name}`,
       `Typ: ${holiday.type}`,
       holiday.state ? `Bundesland: ${stateNames[holiday.state]}` : '',
       ''
@@ -128,7 +179,7 @@ const generateHolidayData = (holidays1: Holiday[], holidays2: Holiday[]) => {
     lines.push('\nPerson 2:');
     holidays2.forEach(holiday => {
       lines.push(
-        `${formatHolidayDate(new Date(holiday.date))} - ${holiday.name}`,
+        `${formatHolidayDate(getHolidayDate(holiday))} - ${holiday.name}`,
         `Typ: ${holiday.type}`,
         holiday.state ? `Bundesland: ${stateNames[holiday.state]}` : '',
         ''
@@ -292,17 +343,6 @@ export const MainLayout: React.FC = () => {
   }, [person1BridgeDays, person2BridgeDays]);
 
   // Memoize vacation calculation functions
-  const calculateRequiredDays = useCallback((start: Date, end: Date, holidays: Holiday[]) => {
-    const allDays = eachDayOfInterval({ start, end });
-    return allDays.reduce((count, d) => {
-      if (isWeekend(d)) return count;
-      const isPublicHoliday = holidays.some(h => 
-        h.type === 'public' && isSameDay(new Date(h.date), d)
-      );
-      return isPublicHoliday ? count : count + 1;
-    }, 0);
-  }, []);
-
   const findConnectedFreeDays = useCallback((
     date: Date,
     direction: 'forward' | 'backward',
@@ -312,7 +352,7 @@ export const MainLayout: React.FC = () => {
     let lastFreeDay = date;
 
     while (isWeekend(currentDay) || holidays.some(h => 
-      h.type === 'public' && isSameDay(new Date(h.date), currentDay)
+      h.type === 'public' && isHolidayOnDate(h, currentDay)
     )) {
       lastFreeDay = currentDay;
       currentDay = direction === 'forward' ? addDays(currentDay, 1) : subDays(currentDay, 1);
@@ -355,7 +395,7 @@ export const MainLayout: React.FC = () => {
       // Required days are workdays that aren't public holidays
       const requiredDays = days.filter(d => 
         !isWeekend(d) && !holidays.some(h => 
-          h.type === 'public' && isSameDay(new Date(h.date), d)
+          h.type === 'public' && isHolidayOnDate(h, d)
         )
       ).length;
       
@@ -498,12 +538,12 @@ export const MainLayout: React.FC = () => {
         <div className="flex items-center gap-1">
           <div className={`w-2.5 h-2.5 rounded ${colors.holiday.bg}`} />
           <div className={`w-2.5 h-2.5 rounded ${colors.bridge.bg}`} />
-          <span className={theme.text.secondary}>Feiertage & Brücken</span>
+          <span className={getThemeTextClass('muted')}>Feiertage & Brücken</span>
         </div>
         <div className="flex items-center gap-1">
           <div className={`w-2.5 h-2.5 rounded ${colors.school.bg}`} />
           <div className={`w-2.5 h-2.5 rounded ${colors.vacation.bg}`} />
-          <span className={theme.text.secondary}>Schule & Urlaub</span>
+          <span className={getThemeTextClass('muted')}>Schule & Urlaub</span>
         </div>
       </div>
     );
@@ -653,50 +693,45 @@ export const MainLayout: React.FC = () => {
   const handleExport = async (type: 'ics' | 'hr' | 'celebration') => {
     switch (type) {
       case 'ics':
-        // Export as iCal
-        const icsData = generateICSData(persons);
-        downloadFile(icsData, 'urlaubsplan.ics', 'text/calendar');
+        const icsContent = generateICSData({ 
+          person1: persons.person1,
+          person2: persons.person2,
+          holidayData
+        });
+        downloadFile(icsContent, 'urlaub.ics', 'text/calendar');
         break;
       case 'hr':
-        // Export as HR format PDF
-        if (persons.person2?.vacationPlans) {
-          // If we have two persons, ask which one to export
-          const personId = await new Promise<1 | 2>((resolve) => {
-            const confirmPerson = window.confirm('Für Person 2 exportieren? (Abbrechen für Person 1)');
-            resolve(confirmPerson ? 2 : 1);
-          });
-
-          const hrPdf = ExportService.createHRDocument(
-            personId === 1 ? persons.person1.vacationPlans : persons.person2.vacationPlans,
-            personId,
-            personId === 1 ? holidayData.person1.holidays : holidayData.person2.holidays
+        if (showSecondPerson && persons.person2) {
+          const selectedPersonId = 2;
+          const hrPdf = exportService.createHRDocument(
+            persons.person2.vacationPlans,
+            selectedPersonId,
+            holidayData.person2.holidays
           );
-          await ExportService.downloadPDF(hrPdf, `urlaubsantrag_person${personId}.pdf`);
+          hrPdf.save(`urlaubsantrag_person${selectedPersonId}.pdf`);
         } else {
-          // If only person 1 exists, export directly
-          const hrPdf = ExportService.createHRDocument(
+          const hrPdf = exportService.createHRDocument(
             persons.person1.vacationPlans,
             1,
             holidayData.person1.holidays
           );
-          await ExportService.downloadPDF(hrPdf, 'urlaubsantrag.pdf');
+          hrPdf.save('urlaubsantrag.pdf');
         }
         break;
       case 'celebration':
-        // Export holidays as PDF
-        const celebrationPdf = ExportService.createCelebrationDocument(
+        const celebrationPdf = exportService.createCelebrationDocument(
           persons.person1.vacationPlans,
           1,
           holidayData.person1.holidays,
-          persons.person2?.vacationPlans || [],
-          holidayData.person2.holidays || [],
+          showSecondPerson ? persons.person2?.vacationPlans || [] : [],
+          holidayData.person2?.holidays || [],
           {
-            person1State: persons.person1.selectedState,
-            person2State: persons.person2?.selectedState,
-            showSharedAnalysis: !!persons.person2?.selectedState
+            person1State: persons.person1.selectedState || GermanState.BE,
+            person2State: showSecondPerson ? persons.person2?.selectedState : undefined,
+            showSharedAnalysis: showSecondPerson
           }
         );
-        await ExportService.downloadPDF(celebrationPdf, 'urlaubsplanung.pdf');
+        celebrationPdf.save('urlaubsplanung.pdf');
         break;
     }
     setShowExportModal(false);

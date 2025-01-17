@@ -72,7 +72,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
             {showPerson2 && onPerson2StateChange && (
               <div className={styles.stateSelection}>
                 <StateSelect
-                  selectedState={person2State}
+                  selectedState={person2State ?? null}
                   onStateChange={onPerson2StateChange}
                   placeholder="Bundesland für Person 2"
                 />

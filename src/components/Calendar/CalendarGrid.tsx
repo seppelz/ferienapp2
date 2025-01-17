@@ -1,7 +1,7 @@
 import React from 'react';
 import { format, isWeekend, isSameDay, isWithinInterval, isBefore, startOfDay } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Holiday } from '../../types/holiday';
+import { Holiday, BridgeDay, SingleDayHoliday, MultiDayHoliday } from '../../types/holiday';
 import { parseDateString } from '../../utils/dateUtils';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -20,6 +20,32 @@ interface CalendarGridProps {
   disabledDates?: DateRange[];
   tabIndex?: number;
 }
+
+// Helper function to safely get date from a Holiday
+const getHolidayDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('start' in holiday && holiday.start) {
+    return new Date(holiday.start);
+  }
+  throw new Error('Invalid holiday date');
+};
+
+// Helper function to check if a holiday is on a specific date
+const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
+  try {
+    if ('date' in holiday && holiday.date) {
+      return isSameDay(new Date(holiday.date), date);
+    } else if ('start' in holiday && holiday.start && holiday.end) {
+      const start = new Date(holiday.start);
+      const end = new Date(holiday.end);
+      return isWithinInterval(date, { start, end });
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   month,
@@ -62,20 +88,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     });
   };
 
-  const getHolidayType = (date: Date, holidays: Holiday[], bridgeDays: Date[]) => {
-    const holiday = holidays.find(h => {
-      if (h.endDate) {
-        return isWithinInterval(date, { start: h.date, end: h.endDate });
-      }
-      return isSameDay(h.date, date);
-    });
-    
-    const isBridgeDay = bridgeDays.some(d => isSameDay(d, date));
-    
-    return {
-      holiday,
-      type: isBridgeDay ? 'bridge' : holiday?.type || null
-    };
+  const getHolidayType = (date: Date, holidays: Holiday[], bridgeDays: Date[]): { 
+    holiday: Holiday | null;
+    type: Holiday['type'] | 'bridge' | null;
+  } => {
+    const isBridgeDay = bridgeDays.some(bd => isSameDay(bd, date));
+    if (isBridgeDay) {
+      return { holiday: null, type: 'bridge' };
+    }
+
+    const holiday = holidays.find(h => isHolidayOnDate(h, date));
+    return holiday ? { holiday, type: holiday.type } : { holiday: null, type: null };
   };
 
   const getDayClasses = (date: Date) => {

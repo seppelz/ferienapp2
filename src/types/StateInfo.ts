@@ -1,8 +1,16 @@
-import { Holiday, SeasonalTradition } from './Holiday';
+import { Holiday } from './holiday';
+import { GermanState } from './GermanState';
+
+export interface VacationDestination {
+  name: string;
+  description: string;
+  attractions: string[];
+  activities: string[];
+}
 
 export interface StateInfo {
   fullName: string;
-  shortName: string;
+  shortName: GermanState;
   capital: string;
   description: string;
   culturalHighlights: string[];
@@ -16,5 +24,18 @@ export interface StateInfo {
   schoolHolidays: Holiday[];
   uniqueHolidayInfo: string;
   traditionInfo: string;
-  seasonalTraditions: SeasonalTradition[];
+  seasonalTraditions: {
+    season: string;
+    description: string;
+  }[];
+  vacationDestinations: VacationDestination[];
+  regionalSpecialties: {
+    title: string;
+    icon: string;
+    items: {
+      title: string;
+      description: string;
+      icon: string;
+    }[];
+  }[];
 } 

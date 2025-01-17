@@ -31,7 +31,8 @@ export const theme = {
   text: {
     heading: `text-[${colors.neutral[900]}] font-bold`,
     body: `text-[${colors.neutral[600]}]`,
-    small: `text-[${colors.neutral[600]}] text-sm`
+    small: `text-[${colors.neutral[600]}] text-sm`,
+    secondary: `text-[${colors.neutral[600]}] text-opacity-75`
   }
 }
 

@@ -1,6 +1,12 @@
 let refreshing = false;
 
 export async function registerServiceWorker() {
+  // Only register service worker in production
+  if (import.meta.env.DEV) {
+    console.log('Service worker registration skipped in development');
+    return;
+  }
+
   if ('serviceWorker' in navigator) {
     try {
       console.log('Starting service worker registration process...');
@@ -14,10 +20,10 @@ export async function registerServiceWorker() {
         console.log('Unregistered service worker');
       }
 
-      // Register service worker
+      // Register service worker with correct path
       console.log('Registering service worker...');
-      const registration = await navigator.serviceWorker.register('/holiday/sw.js', {
-        scope: '/holiday/'
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
       });
       console.log('ServiceWorker registration successful:', registration);
       

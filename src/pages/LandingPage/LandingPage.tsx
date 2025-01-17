@@ -134,6 +134,19 @@ const CTAButton: React.FC<CTAButtonProps> = ({ children }) => {
 };
 
 // Memoized components
+interface FeatureCardProps {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface BenefitCardProps {
+  icon: string;
+  title: string;
+  value: string;
+  description: string;
+}
+
 const FeatureCard = memo<FeatureCardProps>(({ icon, title, description }) => (
   <div className={styles.featureCard} role="article">
     <div className={styles.featureIcon} aria-hidden="true">{icon}</div>

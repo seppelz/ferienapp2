@@ -3,7 +3,7 @@ import { format, isWeekend, isSameDay, isWithinInterval, isBefore, startOfDay, a
 import { de } from 'date-fns/locale';
 import { BaseCalendarProps, useCalendar } from '../../Shared/Calendar/BaseCalendar';
 import { useTheme } from '../../../hooks/useTheme';
-import { Holiday, BridgeDay } from '../../../types/holiday';
+import { Holiday, BridgeDay, SingleDayHoliday, MultiDayHoliday } from '../../../types/holiday';
 import { parseDateString } from '../../../utils/dateUtils';
 
 interface HolidayType {
@@ -128,6 +128,32 @@ const getHolidayColor = (type: string, theme: any, personId: 1 | 2) => {
       return personId === 1 
         ? `bg-emerald-100 text-emerald-700`
         : `bg-cyan-100 text-cyan-700`;
+  }
+};
+
+// Helper function to safely get date from a Holiday
+const getHolidayDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('start' in holiday && holiday.start) {
+    return new Date(holiday.start);
+  }
+  throw new Error('Invalid holiday date');
+};
+
+// Helper function to check if a holiday is on a specific date
+const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
+  try {
+    if ('date' in holiday && holiday.date) {
+      return isSameDay(new Date(holiday.date), date);
+    } else if ('start' in holiday && holiday.start && holiday.end) {
+      const start = new Date(holiday.start);
+      const end = new Date(holiday.end);
+      return isWithinInterval(date, { start, end });
+    }
+    return false;
+  } catch {
+    return false;
   }
 };
 
@@ -392,15 +418,18 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
     bridgeDays: BridgeDay[],
     secondStateHolidays: Holiday[],
     secondStateBridgeDays: BridgeDay[]
-  ) => {
+  ): {
+    firstState: { type: Holiday['type'] | 'bridge' | null; holiday: Holiday | null };
+    secondState: { type: Holiday['type'] | 'bridge' | null; holiday: Holiday | null };
+  } => {
     const result = {
       firstState: { type: null as Holiday['type'] | 'bridge' | null, holiday: null as Holiday | null },
       secondState: { type: null as Holiday['type'] | 'bridge' | null, holiday: null as Holiday | null }
     };
 
     // Check bridge days for both states
-    const firstStateBridgeDay = bridgeDays.find(bd => isSameDay(bd.date, date));
-    const secondStateBridgeDay = secondStateBridgeDays.find(bd => isSameDay(bd.date, date));
+    const firstStateBridgeDay = bridgeDays.find(bd => isHolidayOnDate(bd, date));
+    const secondStateBridgeDay = secondStateBridgeDays.find(bd => isHolidayOnDate(bd, date));
 
     if (firstStateBridgeDay) {
       result.firstState = { type: 'bridge', holiday: null };
@@ -410,19 +439,8 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
     }
 
     // Check holidays for both states
-    const firstStateHoliday = holidays.find(h => {
-      if (h.endDate) {
-        return isWithinInterval(date, { start: h.date, end: h.endDate });
-      }
-      return isSameDay(h.date, date);
-    });
-
-    const secondStateHoliday = secondStateHolidays.find(h => {
-      if (h.endDate) {
-        return isWithinInterval(date, { start: h.date, end: h.endDate });
-      }
-      return isSameDay(h.date, date);
-    });
+    const firstStateHoliday = holidays.find(h => isHolidayOnDate(h, date));
+    const secondStateHoliday = secondStateHolidays.find(h => isHolidayOnDate(h, date));
 
     if (firstStateHoliday && !result.firstState.type) {
       result.firstState = { type: firstStateHoliday.type, holiday: firstStateHoliday };

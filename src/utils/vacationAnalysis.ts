@@ -1,5 +1,5 @@
 import { VacationPlan, BridgeDayRecommendation } from '../types/vacationPlan';
-import { Holiday } from '../types/holiday';
+import { Holiday, SingleDayHoliday, MultiDayHoliday } from '../types/holiday';
 import { 
   addDays, 
   differenceInBusinessDays,
@@ -24,6 +24,42 @@ export interface VacationAnalysis {
   };
 }
 
+// Helper function to safely get date from a Holiday
+const getHolidayDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('start' in holiday && holiday.start) {
+    return new Date(holiday.start);
+  }
+  throw new Error('Invalid holiday date');
+};
+
+// Helper function to get end date from a Holiday
+const getHolidayEndDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('end' in holiday && holiday.end) {
+    return new Date(holiday.end);
+  }
+  return getHolidayDate(holiday); // Default to start date if no end date
+};
+
+// Helper function to check if a holiday is on a specific date
+const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
+  try {
+    if ('date' in holiday && holiday.date) {
+      return isSameDay(new Date(holiday.date), date);
+    } else if ('start' in holiday && holiday.start && holiday.end) {
+      const start = new Date(holiday.start);
+      const end = new Date(holiday.end);
+      return date >= start && date <= end;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 export function findBridgeDayOpportunities(
   holidays: Holiday[],
   existingVacations: VacationPlan[],
@@ -38,25 +74,25 @@ export function findBridgeDayOpportunities(
 
   // Create intervals for school holidays to check overlaps
   const schoolHolidayIntervals = schoolHolidays.map(h => ({
-    start: new Date(h.date),
-    end: new Date(h.date)
+    start: getHolidayDate(h),
+    end: getHolidayEndDate(h)
   }));
 
   // Sort holidays chronologically
   const sortedHolidays = publicHolidays.sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    getHolidayDate(a).getTime() - getHolidayDate(b).getTime()
   );
 
   // Helper function to check if a date is a holiday or school holiday
   const isHolidayOrSchoolHoliday = (date: Date) => {
-    return publicHolidays.some(h => isSameDay(new Date(h.date), date)) ||
+    return publicHolidays.some(h => isHolidayOnDate(h, date)) ||
            schoolHolidayIntervals.some(interval => isWithinInterval(date, interval));
   };
 
   // Look for bridge day opportunities
   for (let i = 0; i < sortedHolidays.length; i++) {
     const holiday = sortedHolidays[i];
-    const holidayDate = new Date(holiday.date);
+    const holidayDate = getHolidayDate(holiday);
     
     if (holidayDate < startDate || holidayDate > endDate) continue;
 
@@ -67,7 +103,7 @@ export function findBridgeDayOpportunities(
 
     while (j < sortedHolidays.length) {
       const nextHoliday = sortedHolidays[j];
-      const nextHolidayDate = new Date(nextHoliday.date);
+      const nextHolidayDate = getHolidayDate(nextHoliday);
       const daysBetween = differenceInBusinessDays(nextHolidayDate, nextDate);
 
       if (daysBetween > 5) break;
@@ -135,13 +171,11 @@ export function analyzeSchoolHolidayOverlap(
   let overlappingDays = 0;
 
   vacations.forEach(vacation => {
-    const vacationDays = eachDayOfInterval({ start: vacation.start, end: vacation.end });
+    const vacationDays = eachDayOfInterval({ start: new Date(vacation.start), end: new Date(vacation.end) });
     totalVacationDays += vacationDays.length;
 
     vacationDays.forEach(day => {
-      if (schoolHolidays.some(holiday => 
-        isSameDay(new Date(holiday.date), day)
-      )) {
+      if (schoolHolidays.some(holiday => isHolidayOnDate(holiday, day))) {
         overlappingDays++;
       }
     });

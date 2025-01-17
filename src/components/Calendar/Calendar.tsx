@@ -77,6 +77,17 @@ export const Calendar: React.FC<CalendarProps> = (props) => {
     };
   };
 
+  const calendarData = {
+    person1: props.holidays.map(h => ({ 
+      date: h.date ? new Date(h.date) : (h.start ? new Date(h.start) : new Date()), 
+      reason: h.name 
+    })),
+    person2: props.secondStateHolidays.map(h => ({ 
+      date: h.date ? new Date(h.date) : (h.start ? new Date(h.start) : new Date()), 
+      reason: h.name 
+    }))
+  };
+
   const baseCalendarProps: BaseCalendarProps = {
     month: currentMonth,
     startDate: selectedStartDate,
@@ -94,10 +105,7 @@ export const Calendar: React.FC<CalendarProps> = (props) => {
     vacationCount: props.vacationCount,
     onVacationSelectComplete: props.onVacationSelectComplete,
     onShowRecommendations: props.onShowRecommendations,
-    recommendedDates: {
-      person1: props.holidays.map(h => ({ date: h.date, reason: h.name })),
-      person2: props.secondStateHolidays.map(h => ({ date: h.date, reason: h.name }))
-    }
+    recommendedDates: calendarData
   };
 
   return isMobile ? (

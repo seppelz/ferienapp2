@@ -1,4 +1,4 @@
-import { Holiday, SeasonalTradition } from './Holiday';
+import { Holiday, SeasonalTradition } from '../../types/holiday';
 
 export interface VacationDestination {
   name: string;

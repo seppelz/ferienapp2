@@ -14,10 +14,27 @@ export const MobileSchoolHolidaysView: React.FC<MobileSchoolHolidaysViewProps> =
   personId,
   onHolidaySelect
 }) => {
-  // Sort school holidays by date
+  const getHolidayDate = (holiday: Holiday): Date => {
+    if ('date' in holiday && holiday.date) {
+      return new Date(holiday.date);
+    } else if ('start' in holiday && holiday.start) {
+      return new Date(holiday.start);
+    }
+    throw new Error('Invalid holiday date');
+  };
+
+  const getHolidayEndDate = (holiday: Holiday): Date => {
+    if ('date' in holiday && holiday.date) {
+      return new Date(holiday.date);
+    } else if ('end' in holiday && holiday.end) {
+      return new Date(holiday.end);
+    }
+    return getHolidayDate(holiday);
+  };
+
   const sortedHolidays = [...schoolHolidays].sort((a, b) => {
-    const aDate = a.endDate || a.date;
-    const bDate = b.endDate || b.date;
+    const aDate = getHolidayDate(a);
+    const bDate = getHolidayDate(b);
     return aDate.getTime() - bDate.getTime();
   });
 
@@ -28,15 +45,15 @@ export const MobileSchoolHolidaysView: React.FC<MobileSchoolHolidaysViewProps> =
           <h3 className="text-sm font-medium text-gray-900">Schulferien</h3>
         </div>
         <div className="divide-y divide-gray-200">
-          {sortedHolidays.map((holiday) => (
+          {sortedHolidays.map(holiday => (
             <button
-              key={`${holiday.date.toString()}-${holiday.endDate?.toString()}`}
-              onClick={() => onHolidaySelect?.(holiday.date)}
+              key={`${getHolidayDate(holiday).toString()}-${getHolidayEndDate(holiday).toString()}`}
+              onClick={() => onHolidaySelect?.(getHolidayDate(holiday))}
               className="w-full px-4 py-2 flex justify-between items-center hover:bg-gray-50 active:bg-gray-100 text-left"
             >
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-900">
-                  {format(holiday.date, 'dd.MM.')} - {format(holiday.endDate || holiday.date, 'dd.MM.yyyy', { locale: de })}
+                  {format(getHolidayDate(holiday), 'dd.MM.')} - {format(getHolidayEndDate(holiday), 'dd.MM.yyyy', { locale: de })}
                 </span>
               </div>
               <span className="text-sm text-gray-600">

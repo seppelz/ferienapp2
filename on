@@ -1,0 +1,29 @@
+[33mcommit 25f047bf44d8d40d7f5813fc20f8deb51a2b2d53[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: sebastian <sebastian.soecker@gmail.comm>
+Date:   Mon Dec 16 17:23:41 2024 -0600
+
+    feat: Implement full-width hero section and improve landing page layout
+
+[33mcommit e5e614d2d1b24fda72bbd6b39ee0169ad138ee9f[m
+Author: sebastian <sebastian.soecker@gmail.comm>
+Date:   Sat Dec 14 13:43:25 2024 -0600
+
+    Fix styling issues: Update column header text colors and spacing
+
+[33mcommit 80abbfb99fb0e622e2381f217f02447bd59a7888[m
+Author: sebastian <sebastian.soecker@gmail.comm>
+Date:   Thu Dec 12 19:20:29 2024 -0600
+
+    feat: add state page improvements plan and UI enhancements
+
+[33mcommit c50d6cfd0df4fea9fec729e23bd4a8557c2b7c69[m
+Author: sebastian <sebastian.soecker@gmail.comm>
+Date:   Thu Dec 12 18:50:33 2024 -0600
+
+    feat(navbar): Enhanced navigation bar with improved visual hierarchy and interactive areas
+
+[33mcommit 47cee91a4893a01dd17b4d2b499e70f968ace8ff[m
+Author: sebastian <sebastian.soecker@gmail.comm>
+Date:   Thu Dec 12 16:05:36 2024 -0600
+
+    fix: optimize sidebar layout and scrolling - Remove duplicate code block, make summary box sticky, fix scrolling behavior

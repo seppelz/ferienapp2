@@ -3,10 +3,20 @@ import { format, isWeekend, isSameDay, isWithinInterval, isBefore, startOfDay, a
 import { de } from 'date-fns/locale';
 import { BaseCalendarProps, useCalendar } from '../../Shared/Calendar/BaseCalendar';
 import { holidayColors } from '../../../constants/colors';
-import { Holiday, BridgeDay } from '../../../types/holiday';
+import { Holiday, BridgeDay, SingleDayHoliday, MultiDayHoliday } from '../../../types/holiday';
 import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import { VacationPlan } from '../../../types/vacationPlan';
+
+interface HolidayType {
+  type: Holiday["type"] | "bridge" | "vacation" | null;
+  holiday?: Holiday;
+}
+
+interface HolidayTypes {
+  firstState: HolidayType;
+  secondState: HolidayType;
+}
 
 interface MobileCalendarProps extends Omit<BaseCalendarProps, 'getDateVacationInfo'> {
   personId: 1 | 2;
@@ -21,6 +31,32 @@ interface MobileCalendarProps extends Omit<BaseCalendarProps, 'getDateVacationIn
   };
   initialDate?: Date | null;
 }
+
+// Helper function to safely get date from a Holiday
+const getHolidayDate = (holiday: Holiday): Date => {
+  if ('date' in holiday && holiday.date) {
+    return new Date(holiday.date);
+  } else if ('start' in holiday && holiday.start) {
+    return new Date(holiday.start);
+  }
+  throw new Error('Invalid holiday date');
+};
+
+// Helper function to check if a holiday is on a specific date
+const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
+  try {
+    if ('date' in holiday && holiday.date) {
+      return isSameDay(new Date(holiday.date), date);
+    } else if ('start' in holiday && holiday.start && holiday.end) {
+      const start = new Date(holiday.start);
+      const end = new Date(holiday.end);
+      return isWithinInterval(date, { start, end });
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
 
 export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
   const {
@@ -95,28 +131,25 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
     );
   }, [props.vacationPlans]);
 
-  const getHolidayType = useCallback((date: Date): { type: Holiday['type'] | 'vacation' | null; holiday: Holiday | null } => {
-    // Check for vacations first
-    if (isDateInVacation(date)) {
-      return { type: 'vacation', holiday: null };
+  const getHolidayType = (date: Date): HolidayType => {
+    const holiday = props.holidays.find(h => isHolidayOnDate(h, date));
+    const bridgeDay = props.bridgeDays.find(bd => isHolidayOnDate(bd, date));
+    const vacationInfo = props.getDateVacationInfo(date);
+
+    if (vacationInfo.person1Vacation || vacationInfo.person2Vacation || vacationInfo.isSharedVacation) {
+      return { type: 'vacation' };
     }
 
-    // Then check for bridge days
-    const isBridgeDay = props.bridgeDays?.some(bd => isSameDay(bd.date, date));
-    if (isBridgeDay) {
-      return { type: 'bridge', holiday: null };
+    if (bridgeDay) {
+      return { type: 'bridge' };
     }
 
-    // Then check for holidays
-    const holiday = props.holidays?.find(h => {
-      if (h.endDate) {
-        return isWithinInterval(date, { start: h.date, end: h.endDate });
-      }
-      return isSameDay(h.date, date);
-    });
+    if (holiday) {
+      return { type: holiday.type, holiday };
+    }
 
-    return holiday ? { type: holiday.type, holiday } : { type: null, holiday: null };
-  }, [isDateInVacation, props.bridgeDays, props.holidays]);
+    return { type: null };
+  };
 
   // Generate calendar grid
   const weeks = useMemo<Date[][]>(() => {
@@ -247,7 +280,7 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
 
   // Memoize expensive date operations
   const getBridgeDayInfo = (date: Date) => {
-    const bridgeDay = props.bridgeDays?.find(bd => isSameDay(bd.date, date));
+    const bridgeDay = props.bridgeDays?.find(bd => isHolidayOnDate(bd, date));
     return bridgeDay;
   };
 
@@ -332,7 +365,7 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
               <div key={weekIndex} role="row" className="contents">
                 {week.map((date, dayIndex) => {
                   const isDisabled = isDateDisabled(date);
-                  const { holiday } = getHolidayType(date);
+                  const holidayInfo = getHolidayType(date);
                   const isToday = isSameDay(date, today);
                   const vacationInfo = props.getDateVacationInfo(date);
                   const isSelected = isDateInRange(date);
@@ -341,7 +374,7 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
                   const dateLabel = [
                     format(date, 'd. MMMM yyyy', { locale: de }),
                     isToday && 'Heute',
-                    holiday?.name,
+                    holidayInfo.holiday?.name,
                     vacationInfo.isSharedVacation && 'Gemeinsamer Urlaub',
                     isDisabled && 'Nicht verfügbar'
                   ].filter(Boolean).join(', ');

@@ -1,20 +1,20 @@
 export enum GermanState {
-  BE = 'BE',
-  BW = 'BW',
-  BY = 'BY',
-  BB = 'BB',
-  HB = 'HB',
-  HH = 'HH',
-  HE = 'HE',
-  MV = 'MV',
-  NI = 'NI',
-  NW = 'NW',
-  RP = 'RP',
-  SL = 'SL',
-  SN = 'SN',
-  ST = 'ST',
-  SH = 'SH',
-  TH = 'TH'
+  BW = 'BW',  // Baden-Württemberg
+  BY = 'BY',  // Bayern
+  BE = 'BE',  // Berlin
+  BB = 'BB',  // Brandenburg
+  HB = 'HB',  // Bremen
+  HH = 'HH',  // Hamburg
+  HE = 'HE',  // Hessen
+  MV = 'MV',  // Mecklenburg-Vorpommern
+  NI = 'NI',  // Niedersachsen
+  NW = 'NW',  // Nordrhein-Westfalen
+  RP = 'RP',  // Rheinland-Pfalz
+  SL = 'SL',  // Saarland
+  SN = 'SN',  // Sachsen
+  ST = 'ST',  // Sachsen-Anhalt
+  SH = 'SH',  // Schleswig-Holstein
+  TH = 'TH'  // Thüringen
 }
 
 export const stateNames: Record<GermanState, string> = {
