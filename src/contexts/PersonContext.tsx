@@ -52,6 +52,17 @@ export const PersonProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const savedPersons = await loadPersons();
         if (savedPersons) {
           setPersons(savedPersons);
+        } else {
+          // Set default state when no data is found
+          setPersons({
+            person1: {
+              id: 1,
+              selectedState: GermanState.BE,
+              availableVacationDays: 30,
+              vacationPlans: []
+            },
+            person2: null
+          });
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to load data'));

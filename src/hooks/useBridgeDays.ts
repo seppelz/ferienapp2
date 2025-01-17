@@ -16,17 +16,15 @@ interface BridgeDaysResult {
 
 export function useBridgeDays(state: GermanState | null): BridgeDaysResult {
   const memoizedState = useMemo(() => state, [state]);
-  const year = new Date().getFullYear();
+  const memoizedYear = useMemo(() => new Date().getFullYear(), []);
 
-  const holidays = useMemo((): Holiday[] => {
-    if (!memoizedState) {
-      return [];
-    }
+  const holidays = useMemo(() => {
+    if (!memoizedState) return [];
     return [
-      ...holidayService.getPublicHolidays(year, memoizedState),
-      ...holidayService.getSchoolHolidays(year, memoizedState)
+      ...holidayService.getPublicHolidays(memoizedYear, memoizedState),
+      ...holidayService.getSchoolHolidays(memoizedYear, memoizedState)
     ];
-  }, [memoizedState, year]);
+  }, [memoizedState, memoizedYear]);
 
   const getBridgeDays = useCallback((): BridgeDay[] => {
     if (!memoizedState) {
@@ -42,16 +40,16 @@ export function useBridgeDays(state: GermanState | null): BridgeDaysResult {
       if (!memoizedState) {
         return false;
       }
-      const publicHolidays = holidayService.getPublicHolidays(year, memoizedState);
+      const publicHolidays = holidayService.getPublicHolidays(memoizedYear, memoizedState);
       return publicHolidays.some(h => isSameDay(getHolidayDate(h), d));
     },
-    [memoizedState, year]
+    [memoizedState, memoizedYear]
   );
 
   return {
     holidays,
     bridgeDays,
-    isLoading: !memoizedState,
+    isLoading: false,
     getBridgeDays,
     isPublicHoliday,
   };
