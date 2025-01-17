@@ -47,14 +47,14 @@ const DateTooltip: React.FC<DateTooltipProps> = ({
   isSelectingVacation
 }) => {
   const theme = useTheme();
-  const items: { icon: string; text: string; color: string }[] = [];
+  const items: { icon: string; text: string; className: string }[] = [];
 
   // Add holiday information
   if (holidayTypes.firstState.holiday?.name) {
     items.push({
       icon: '🎉',
       text: `Feiertag: ${holidayTypes.firstState.holiday.name}`,
-      color: theme.colors.secondary.holiday
+      className: 'text-red-700'
     });
   }
 
@@ -63,14 +63,14 @@ const DateTooltip: React.FC<DateTooltipProps> = ({
     items.push({
       icon: '🌉',
       text: 'Brückentag Person 1',
-      color: theme.colors.secondary.bridge
+      className: 'text-orange-700'
     });
   }
   if (holidayTypes.secondState.type === 'bridge') {
     items.push({
       icon: '🌉',
       text: 'Brückentag Person 2',
-      color: theme.colors.secondary.bridge
+      className: 'text-orange-700'
     });
   }
 
@@ -79,21 +79,21 @@ const DateTooltip: React.FC<DateTooltipProps> = ({
     items.push({
       icon: '✈️',
       text: 'Gemeinsamer Urlaub',
-      color: theme.colors.primary.beach.ocean
+      className: 'text-sky-700'
     });
   } else {
     if (vacationInfo.person1Vacation) {
       items.push({
         icon: '🏖️',
         text: 'Urlaub Person 1',
-        color: theme.colors.primary.ui.person1
+        className: 'text-sky-700'
       });
     }
     if (vacationInfo.person2Vacation) {
       items.push({
         icon: '🏖️',
         text: 'Urlaub Person 2',
-        color: theme.colors.primary.ui.person2
+        className: 'text-emerald-700'
       });
     }
   }
@@ -106,7 +106,7 @@ const DateTooltip: React.FC<DateTooltipProps> = ({
     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
       <div className={`${theme.effects.glass.light} ${theme.effects.rounded.lg} ${theme.effects.shadows.lg} p-2 text-sm`}>
         {items.map((item, index) => (
-          <div key={index} className={`flex items-center gap-2 text-[${item.color}] whitespace-nowrap ${theme.effects.transitions.default}`}>
+          <div key={index} className={`flex items-center gap-2 ${item.className} whitespace-nowrap ${theme.effects.transitions.default}`}>
             <span>{item.icon}</span>
             <span>{item.text}</span>
           </div>
@@ -119,15 +119,15 @@ const DateTooltip: React.FC<DateTooltipProps> = ({
 const getHolidayColor = (type: string, theme: any, personId: 1 | 2) => {
   switch (type) {
     case 'public':
-      return `bg-red-100 text-red-700`;
+      return 'bg-red-100/80 text-red-700';
     case 'bridge':
-      return `bg-orange-100 text-orange-700`;
+      return 'bg-orange-100/80 text-orange-700';
     case 'school':
-      return `bg-purple-100 text-purple-700`;
+      return 'bg-purple-100/80 text-purple-700';
     default:
       return personId === 1 
-        ? `bg-emerald-100 text-emerald-700`
-        : `bg-cyan-100 text-cyan-700`;
+        ? 'bg-sky-100/80 text-sky-700'
+        : 'bg-emerald-100/80 text-emerald-700';
   }
 };
 
