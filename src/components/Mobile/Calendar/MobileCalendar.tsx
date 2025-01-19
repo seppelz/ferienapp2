@@ -4,8 +4,6 @@ import { de } from 'date-fns/locale';
 import { BaseCalendarProps, useCalendar } from '../../Shared/Calendar/BaseCalendar';
 import { holidayColors } from '../../../constants/colors';
 import { Holiday, BridgeDay, SingleDayHoliday, MultiDayHoliday } from '../../../types/holiday';
-import { useSpring, animated } from '@react-spring/web';
-import { useDrag } from '@use-gesture/react';
 import { VacationPlan } from '../../../types/vacationPlan';
 
 interface HolidayType {
@@ -68,58 +66,10 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
 
   const today = useMemo(() => startOfDay(new Date()), []);
 
-  // Animation for swipe gestures
-  const [{ x }, api] = useSpring(() => ({ x: 0 }));
-
-  // Reset animation when month changes
-  useEffect(() => {
-    api.start({ x: 0, immediate: true });
-  }, [props.month]);
-
   // Handle month change
   const handleMonthChange = (direction: number) => {
     props.onMonthChange?.(direction);
   };
-
-  // Bind swipe gesture
-  const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir], tap, event }) => {
-      if (tap && props.isSelectingVacation) {
-        // Only handle date selection on tap, not swipe
-        const target = event.target as HTMLElement;
-        const dateButton = target.closest('button');
-        if (dateButton) {
-          const date = new Date(dateButton.parentElement?.dataset.date || '');
-          if (!isDateDisabled(date)) {
-            handleDateSelect(date);
-          }
-        }
-        return;
-      }
-
-      if (!active) {
-        if (Math.abs(mx) > 50) {
-          handleMonthChange(xDir > 0 ? -1 : 1);
-        }
-        api.start({ x: 0 });
-      } else {
-        api.start({ x: mx, immediate: true });
-      }
-    },
-    {
-      axis: 'x',
-      swipe: {
-        distance: 50
-      },
-      preventScroll: true,
-      eventOptions: { passive: false },
-      bounds: undefined,
-      rubberband: true,
-      from: () => [x.get(), 0],
-      filterTaps: true,
-      touchAction: 'none'
-    }
-  );
 
   // Memoize expensive date operations
   const isDateDisabled = useCallback((date: Date) => {
@@ -297,12 +247,6 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
     }
   };
 
-  // Memoize expensive date operations
-  const getBridgeDayInfo = (date: Date) => {
-    const bridgeDay = props.bridgeDays?.find(bd => isHolidayOnDate(bd, date));
-    return bridgeDay;
-  };
-
   return (
     <div className="relative w-full">
       <div className="select-none bg-white rounded-xl shadow-lg p-4">
@@ -349,18 +293,7 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
           </button>
         </div>
 
-        <animated.div
-          {...bind()}
-          style={{ 
-            x,
-            touchAction: 'none',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitTapHighlightColor: 'transparent',
-            WebkitTouchCallout: 'none'
-          }}
-          className="w-full touch-none"
-        >
+        <div className="w-full">
           <div className="grid grid-cols-7 bg-gray-50/50 rounded-lg overflow-hidden shadow-inner">
             {/* Weekday headers - Enhanced styling */}
             <div className="contents" role="row">
@@ -382,7 +315,7 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
               ))}
             </div>
             
-            {/* Calendar grid - Remove touch handlers from buttons */}
+            {/* Calendar grid */}
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} role="row" className="contents">
                 {week.map((date, dayIndex) => {
@@ -411,6 +344,11 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
                         className={`w-full h-11 flex flex-col items-center justify-center ${getDateClasses(date)} 
                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                           ${!isCurrentMonth ? 'focus:ring-gray-400' : ''}`}
+                        onClick={() => {
+                          if (!isDisabled && props.isSelectingVacation) {
+                            handleDateSelect(date);
+                          }
+                        }}
                         onKeyDown={(e) => handleKeyDown(e, date)}
                         role="gridcell"
                         aria-disabled={isDisabled}
@@ -440,14 +378,6 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
               </div>
             ))}
           </div>
-        </animated.div>
-
-        {/* Enhanced swipe hint */}
-        <div 
-          className="text-center text-xs text-gray-500 mt-3 font-medium tracking-wide animate-pulse"
-          aria-hidden="true"
-        >
-          ← Wischen zum Monatswechsel →
         </div>
       </div>
     </div>
