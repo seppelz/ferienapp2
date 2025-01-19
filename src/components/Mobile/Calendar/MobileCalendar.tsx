@@ -6,6 +6,12 @@ import { holidayColors } from '../../../constants/colors';
 import { Holiday, BridgeDay, SingleDayHoliday, MultiDayHoliday } from '../../../types/holiday';
 import { VacationPlan } from '../../../types/vacationPlan';
 
+// Utility function to parse date strings into local dates
+const parseLocalDate = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day); // month is 0-indexed in JS Date
+};
+
 interface HolidayType {
   type: Holiday["type"] | "bridge" | "vacation" | null;
   holiday?: Holiday;
@@ -33,9 +39,9 @@ interface MobileCalendarProps extends Omit<BaseCalendarProps, 'getDateVacationIn
 // Helper function to safely get date from a Holiday
 const getHolidayDate = (holiday: Holiday): Date => {
   if ('date' in holiday && holiday.date) {
-    return new Date(holiday.date);
+    return parseLocalDate(holiday.date);
   } else if ('start' in holiday && holiday.start) {
-    return new Date(holiday.start);
+    return parseLocalDate(holiday.start);
   }
   throw new Error('Invalid holiday date');
 };
@@ -44,10 +50,10 @@ const getHolidayDate = (holiday: Holiday): Date => {
 const isHolidayOnDate = (holiday: Holiday, date: Date): boolean => {
   try {
     if ('date' in holiday && holiday.date) {
-      return isSameDay(new Date(holiday.date), date);
+      return isSameDay(parseLocalDate(holiday.date), date);
     } else if ('start' in holiday && holiday.start && holiday.end) {
-      const start = new Date(holiday.start);
-      const end = new Date(holiday.end);
+      const start = parseLocalDate(holiday.start);
+      const end = parseLocalDate(holiday.end);
       return isWithinInterval(date, { start, end });
     }
     return false;

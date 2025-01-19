@@ -4,6 +4,12 @@ import { de } from 'date-fns/locale';
 import { Holiday } from '../../../types/holiday';
 import { VacationPlan } from '../../../types/vacationPlan';
 
+// Utility function to parse date strings into local dates
+const parseLocalDate = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day); // month is 0-indexed in JS Date
+};
+
 interface LegendItem {
   color: string;
   label: string;
@@ -33,11 +39,11 @@ export const MobileCalendarLegend: React.FC<MobileCalendarLegendProps> = ({
   // Filter holidays for current month
   const currentMonthHolidays = holidays.filter(holiday => {
     if ('date' in holiday && holiday.date) {
-      return isSameMonth(new Date(holiday.date), currentMonth);
+      return isSameMonth(parseLocalDate(holiday.date), currentMonth);
     }
     if ('start' in holiday && holiday.start && holiday.end) {
-      const start = new Date(holiday.start);
-      const end = new Date(holiday.end);
+      const start = parseLocalDate(holiday.start);
+      const end = parseLocalDate(holiday.end);
       return isSameMonth(start, currentMonth) || isSameMonth(end, currentMonth);
     }
     return false;
@@ -46,8 +52,8 @@ export const MobileCalendarLegend: React.FC<MobileCalendarLegendProps> = ({
   // Filter school holidays for current month
   const currentMonthSchoolHolidays = schoolHolidays.filter(holiday => {
     if ('start' in holiday && holiday.start && holiday.end) {
-      const start = new Date(holiday.start);
-      const end = new Date(holiday.end);
+      const start = parseLocalDate(holiday.start);
+      const end = parseLocalDate(holiday.end);
       return isSameMonth(start, currentMonth) || isSameMonth(end, currentMonth);
     }
     return false;
@@ -100,8 +106,8 @@ export const MobileCalendarLegend: React.FC<MobileCalendarLegendProps> = ({
                   <span>{holiday.name}</span>
                   <span className="text-gray-500 ml-2">
                     {format(
-                      new Date('date' in holiday && holiday.date ? holiday.date : 
-                              'start' in holiday && holiday.start ? holiday.start : new Date()),
+                      parseLocalDate('date' in holiday && holiday.date ? holiday.date : 
+                              'start' in holiday && holiday.start ? holiday.start : new Date().toISOString().split('T')[0]),
                       'd. MMM',
                       { locale: de }
                     )}
@@ -122,9 +128,9 @@ export const MobileCalendarLegend: React.FC<MobileCalendarLegendProps> = ({
                   <span className="text-gray-500 ml-2">
                     {'start' in holiday && holiday.start && holiday.end && (
                       <>
-                        {formatDateRange(new Date(holiday.start), new Date(holiday.end))}
+                        {formatDateRange(parseLocalDate(holiday.start), parseLocalDate(holiday.end))}
                         <span className="ml-1">
-                          ({getDayCount(new Date(holiday.start), new Date(holiday.end))})
+                          ({getDayCount(parseLocalDate(holiday.start), parseLocalDate(holiday.end))})
                         </span>
                       </>
                     )}
