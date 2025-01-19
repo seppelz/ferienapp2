@@ -83,7 +83,20 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
 
   // Bind swipe gesture
   const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir] }) => {
+    ({ active, movement: [mx], direction: [xDir], tap, event }) => {
+      if (tap && props.isSelectingVacation) {
+        // Only handle date selection on tap, not swipe
+        const target = event.target as HTMLElement;
+        const dateButton = target.closest('button');
+        if (dateButton) {
+          const date = new Date(dateButton.parentElement?.dataset.date || '');
+          if (!isDateDisabled(date)) {
+            handleDateSelect(date);
+          }
+        }
+        return;
+      }
+
       if (!active) {
         if (Math.abs(mx) > 50) {
           handleMonthChange(xDir > 0 ? -1 : 1);
@@ -369,7 +382,7 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
               ))}
             </div>
             
-            {/* Calendar grid - Adjusted cell sizes */}
+            {/* Calendar grid - Remove touch handlers from buttons */}
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} role="row" className="contents">
                 {week.map((date, dayIndex) => {
@@ -398,24 +411,6 @@ export const MobileCalendar: React.FC<MobileCalendarProps> = (props) => {
                         className={`w-full h-11 flex flex-col items-center justify-center ${getDateClasses(date)} 
                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                           ${!isCurrentMonth ? 'focus:ring-gray-400' : ''}`}
-                        onTouchStart={(e) => {
-                          if (!isDisabled && props.isSelectingVacation) {
-                            e.preventDefault();
-                            handleDateHover(date);
-                          }
-                        }}
-                        onTouchEnd={(e) => {
-                          if (!isDisabled && props.isSelectingVacation) {
-                            e.preventDefault();
-                            handleDateSelect(date);
-                          }
-                        }}
-                        onClick={(e) => {
-                          if (!isDisabled && props.isSelectingVacation) {
-                            e.preventDefault();
-                            handleDateSelect(date);
-                          }
-                        }}
                         onKeyDown={(e) => handleKeyDown(e, date)}
                         role="gridcell"
                         aria-disabled={isDisabled}
