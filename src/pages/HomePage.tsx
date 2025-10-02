@@ -8,25 +8,27 @@ interface HomePageProps {
   onVacationSelectComplete?: () => void;
   selectedPersonId?: 1 | 2;
   onShowRecommendations?: (personId: 1 | 2) => void;
+  year?: number;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
   isSelectingVacation = false,
   onVacationSelectComplete,
   selectedPersonId = 1,
-  onShowRecommendations
+  onShowRecommendations,
+  year = new Date().getFullYear()
 }) => {
   const { persons, addVacationPlan, deleteVacationPlan } = usePersonContext();
   const { 
     holidays: person1Holidays, 
     bridgeDays: person1BridgeDays, 
     isLoading: isFirstStateLoading 
-  } = useBridgeDays(persons.person1?.selectedState || null);
+  } = useBridgeDays(persons.person1?.selectedState || null, year);
   const { 
     holidays: person2Holidays, 
     bridgeDays: person2BridgeDays, 
     isLoading: isSecondStateLoading 
-  } = useBridgeDays(persons.person2?.selectedState || null);
+  } = useBridgeDays(persons.person2?.selectedState || null, year);
 
   const isLoading = isFirstStateLoading || (persons.person2 && isSecondStateLoading);
 
@@ -78,6 +80,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         isSelectingVacation={isSelectingVacation}
         onVacationSelectComplete={onVacationSelectComplete}
         onShowRecommendations={onShowRecommendations}
+        year={year}
       />
     </div>
   );

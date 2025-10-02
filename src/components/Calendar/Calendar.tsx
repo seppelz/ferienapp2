@@ -25,10 +25,11 @@ interface CalendarProps {
   isSelectingVacation?: boolean;
   onVacationSelectComplete?: () => void;
   onShowRecommendations?: (personId: 1 | 2) => void;
+  year?: number;
 }
 
 export const Calendar: React.FC<CalendarProps> = (props) => {
-  const [currentMonth] = useState(new Date(2025, 0));
+  const [currentMonth] = useState(new Date(props.year || new Date().getFullYear(), 0));
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');

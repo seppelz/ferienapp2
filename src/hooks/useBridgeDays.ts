@@ -14,9 +14,9 @@ interface BridgeDaysResult {
   isPublicHoliday: (d: Date) => boolean;
 }
 
-export function useBridgeDays(state: GermanState | null): BridgeDaysResult {
+export function useBridgeDays(state: GermanState | null, year: number = new Date().getFullYear()): BridgeDaysResult {
   const memoizedState = useMemo(() => state, [state]);
-  const memoizedYear = useMemo(() => new Date().getFullYear(), []);
+  const memoizedYear = useMemo(() => year, [year]);
 
   const holidays = useMemo(() => {
     if (!memoizedState) return [];
