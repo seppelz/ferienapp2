@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { DesktopCalendar } from '../Desktop/Calendar/DesktopCalendar';
 import { MobileCalendar } from '../Mobile/Calendar/MobileCalendar';
@@ -29,7 +29,12 @@ interface CalendarProps {
 }
 
 export const Calendar: React.FC<CalendarProps> = (props) => {
-  const [currentMonth] = useState(new Date(props.year || new Date().getFullYear(), 0));
+  const [currentMonth, setCurrentMonth] = useState(new Date(props.year || new Date().getFullYear(), 0));
+  
+  // Update calendar when year changes
+  useEffect(() => {
+    setCurrentMonth(new Date(props.year || new Date().getFullYear(), 0));
+  }, [props.year]);
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
