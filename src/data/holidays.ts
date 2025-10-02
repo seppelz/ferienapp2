@@ -1115,11 +1115,186 @@ export const holidays: HolidayData = {
           "end": "2027-01-10"
         }
       ],
-      "BY": [],
-      "BE": [],
-      "BB": [],
-      "HB": [],
-      "HH": [],
+      "BY": [
+        {
+          "name": "winterferien bayern 2026",
+          "start": "2026-02-16",
+          "end": "2026-02-20"
+        },
+        {
+          "name": "osterferien bayern 2026",
+          "start": "2026-03-30",
+          "end": "2026-04-10"
+        },
+        {
+          "name": "pfingstferien bayern 2026",
+          "start": "2026-05-26",
+          "end": "2026-06-05"
+        },
+        {
+          "name": "sommerferien bayern 2026",
+          "start": "2026-08-03",
+          "end": "2026-09-14"
+        },
+        {
+          "name": "herbstferien bayern 2026 (teil 1)",
+          "start": "2026-11-02",
+          "end": "2026-11-06"
+        },
+        {
+          "name": "herbstferien bayern 2026 (teil 2)",
+          "start": "2026-11-18",
+          "end": "2026-11-18"
+        },
+        {
+          "name": "weihnachtsferien bayern 2026",
+          "start": "2026-12-24",
+          "end": "2027-01-08"
+        }
+      ],
+      "BE": [
+        {
+          "name": "winterferien berlin 2026",
+          "start": "2026-02-02",
+          "end": "2026-02-07"
+        },
+        {
+          "name": "osterferien berlin 2026 (teil 1)",
+          "start": "2026-03-30",
+          "end": "2026-04-10"
+        },
+        {
+          "name": "osterferien berlin 2026 (teil 2)",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "pfingstferien berlin 2026",
+          "start": "2026-05-26",
+          "end": "2026-05-26"
+        },
+        {
+          "name": "sommerferien berlin 2026",
+          "start": "2026-07-09",
+          "end": "2026-08-22"
+        },
+        {
+          "name": "herbstferien berlin 2026",
+          "start": "2026-10-19",
+          "end": "2026-10-31"
+        },
+        {
+          "name": "weihnachtsferien berlin 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-02"
+        }
+      ],
+      "BB": [
+        {
+          "name": "winterferien brandenburg 2026",
+          "start": "2026-02-02",
+          "end": "2026-02-07"
+        },
+        {
+          "name": "osterferien brandenburg 2026 (teil 1)",
+          "start": "2026-03-30",
+          "end": "2026-04-10"
+        },
+        {
+          "name": "osterferien brandenburg 2026 (teil 2)",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "pfingstferien brandenburg 2026",
+          "start": "2026-05-26",
+          "end": "2026-05-26"
+        },
+        {
+          "name": "sommerferien brandenburg 2026",
+          "start": "2026-07-09",
+          "end": "2026-08-22"
+        },
+        {
+          "name": "herbstferien brandenburg 2026",
+          "start": "2026-10-19",
+          "end": "2026-10-30"
+        },
+        {
+          "name": "weihnachtsferien brandenburg 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-02"
+        }
+      ],
+      "HB": [
+        {
+          "name": "winterferien bremen 2026",
+          "start": "2026-02-02",
+          "end": "2026-02-03"
+        },
+        {
+          "name": "osterferien bremen 2026",
+          "start": "2026-03-23",
+          "end": "2026-04-07"
+        },
+        {
+          "name": "pfingstferien bremen 2026 (teil 1)",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "pfingstferien bremen 2026 (teil 2)",
+          "start": "2026-05-26",
+          "end": "2026-05-26"
+        },
+        {
+          "name": "sommerferien bremen 2026",
+          "start": "2026-07-02",
+          "end": "2026-08-12"
+        },
+        {
+          "name": "herbstferien bremen 2026",
+          "start": "2026-10-12",
+          "end": "2026-10-24"
+        },
+        {
+          "name": "weihnachtsferien bremen 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-09"
+        }
+      ],
+      "HH": [
+        {
+          "name": "winterferien hamburg 2026",
+          "start": "2026-01-30",
+          "end": "2026-01-30"
+        },
+        {
+          "name": "osterferien hamburg 2026",
+          "start": "2026-03-02",
+          "end": "2026-03-13"
+        },
+        {
+          "name": "pfingstferien hamburg 2026",
+          "start": "2026-05-11",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "sommerferien hamburg 2026",
+          "start": "2026-07-09",
+          "end": "2026-08-19"
+        },
+        {
+          "name": "herbstferien hamburg 2026",
+          "start": "2026-10-19",
+          "end": "2026-10-30"
+        },
+        {
+          "name": "weihnachtsferien hamburg 2026",
+          "start": "2026-12-21",
+          "end": "2027-01-01"
+        }
+      ],
       "HE": [
         {
           "name": "osterferien hessen 2026",
@@ -1142,8 +1317,85 @@ export const holidays: HolidayData = {
           "end": "2027-01-12"
         }
       ],
-      "MV": [],
-      "NI": [],
+      "MV": [
+        {
+          "name": "winterferien mecklenburg-vorpommern 2026",
+          "start": "2026-02-09",
+          "end": "2026-02-20"
+        },
+        {
+          "name": "osterferien mecklenburg-vorpommern 2026",
+          "start": "2026-03-30",
+          "end": "2026-04-08"
+        },
+        {
+          "name": "pfingstferien mecklenburg-vorpommern 2026 (teil 1)",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "pfingstferien mecklenburg-vorpommern 2026 (teil 2)",
+          "start": "2026-05-22",
+          "end": "2026-05-26"
+        },
+        {
+          "name": "sommerferien mecklenburg-vorpommern 2026",
+          "start": "2026-07-13",
+          "end": "2026-08-22"
+        },
+        {
+          "name": "herbstferien mecklenburg-vorpommern 2026 (teil 1)",
+          "start": "2026-10-19",
+          "end": "2026-10-24"
+        },
+        {
+          "name": "herbstferien mecklenburg-vorpommern 2026 (teil 2)",
+          "start": "2026-11-26",
+          "end": "2026-11-27"
+        },
+        {
+          "name": "weihnachtsferien mecklenburg-vorpommern 2026",
+          "start": "2026-12-19",
+          "end": "2027-01-02"
+        }
+      ],
+      "NI": [
+        {
+          "name": "winterferien niedersachsen 2026",
+          "start": "2026-02-02",
+          "end": "2026-02-03"
+        },
+        {
+          "name": "osterferien niedersachsen 2026",
+          "start": "2026-03-23",
+          "end": "2026-04-07"
+        },
+        {
+          "name": "pfingstferien niedersachsen 2026 (teil 1)",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "pfingstferien niedersachsen 2026 (teil 2)",
+          "start": "2026-05-26",
+          "end": "2026-05-26"
+        },
+        {
+          "name": "sommerferien niedersachsen 2026",
+          "start": "2026-07-02",
+          "end": "2026-08-12"
+        },
+        {
+          "name": "herbstferien niedersachsen 2026",
+          "start": "2026-10-12",
+          "end": "2026-10-24"
+        },
+        {
+          "name": "weihnachtsferien niedersachsen 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-09"
+        }
+      ],
       "NW": [
         {
           "name": "osterferien nordrhein-westfalen 2026",
@@ -1171,12 +1423,183 @@ export const holidays: HolidayData = {
           "end": "2027-01-06"
         }
       ],
-      "RP": [],
-      "SL": [],
-      "SN": [],
-      "ST": [],
-      "SH": [],
-      "TH": []
+      "RP": [
+        {
+          "name": "osterferien rheinland-pfalz 2026",
+          "start": "2026-03-30",
+          "end": "2026-04-10"
+        },
+        {
+          "name": "sommerferien rheinland-pfalz 2026",
+          "start": "2026-06-29",
+          "end": "2026-08-07"
+        },
+        {
+          "name": "herbstferien rheinland-pfalz 2026",
+          "start": "2026-10-05",
+          "end": "2026-10-16"
+        },
+        {
+          "name": "weihnachtsferien rheinland-pfalz 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-08"
+        }
+      ],
+      "SL": [
+        {
+          "name": "winterferien saarland 2026",
+          "start": "2026-02-16",
+          "end": "2026-02-20"
+        },
+        {
+          "name": "osterferien saarland 2026",
+          "start": "2026-04-07",
+          "end": "2026-04-17"
+        },
+        {
+          "name": "sommerferien saarland 2026",
+          "start": "2026-06-29",
+          "end": "2026-08-07"
+        },
+        {
+          "name": "herbstferien saarland 2026",
+          "start": "2026-10-05",
+          "end": "2026-10-16"
+        },
+        {
+          "name": "weihnachtsferien saarland 2026",
+          "start": "2026-12-21",
+          "end": "2026-12-31"
+        }
+      ],
+      "SN": [
+        {
+          "name": "winterferien sachsen 2026",
+          "start": "2026-02-09",
+          "end": "2026-02-21"
+        },
+        {
+          "name": "osterferien sachsen 2026 (teil 1)",
+          "start": "2026-04-03",
+          "end": "2026-04-10"
+        },
+        {
+          "name": "osterferien sachsen 2026 (teil 2)",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "sommerferien sachsen 2026",
+          "start": "2026-07-04",
+          "end": "2026-08-14"
+        },
+        {
+          "name": "herbstferien sachsen 2026",
+          "start": "2026-10-12",
+          "end": "2026-10-24"
+        },
+        {
+          "name": "weihnachtsferien sachsen 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-02"
+        }
+      ],
+      "ST": [
+        {
+          "name": "winterferien sachsen-anhalt 2026",
+          "start": "2026-01-31",
+          "end": "2026-02-06"
+        },
+        {
+          "name": "osterferien sachsen-anhalt 2026",
+          "start": "2026-03-30",
+          "end": "2026-04-04"
+        },
+        {
+          "name": "pfingstferien sachsen-anhalt 2026",
+          "start": "2026-05-26",
+          "end": "2026-05-29"
+        },
+        {
+          "name": "sommerferien sachsen-anhalt 2026",
+          "start": "2026-07-04",
+          "end": "2026-08-14"
+        },
+        {
+          "name": "herbstferien sachsen-anhalt 2026",
+          "start": "2026-10-19",
+          "end": "2026-10-30"
+        },
+        {
+          "name": "weihnachtsferien sachsen-anhalt 2026",
+          "start": "2026-12-21",
+          "end": "2027-01-02"
+        }
+      ],
+      "SH": [
+        {
+          "name": "winterferien schleswig-holstein 2026",
+          "start": "2026-02-02",
+          "end": "2026-02-03"
+        },
+        {
+          "name": "osterferien schleswig-holstein 2026",
+          "start": "2026-03-26",
+          "end": "2026-04-10"
+        },
+        {
+          "name": "pfingstferien schleswig-holstein 2026",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "sommerferien schleswig-holstein 2026",
+          "start": "2026-07-04",
+          "end": "2026-08-15"
+        },
+        {
+          "name": "herbstferien schleswig-holstein 2026",
+          "start": "2026-10-12",
+          "end": "2026-10-24"
+        },
+        {
+          "name": "weihnachtsferien schleswig-holstein 2026",
+          "start": "2026-12-21",
+          "end": "2027-01-06"
+        }
+      ],
+      "TH": [
+        {
+          "name": "winterferien thüringen 2026",
+          "start": "2026-02-16",
+          "end": "2026-02-21"
+        },
+        {
+          "name": "osterferien thüringen 2026",
+          "start": "2026-04-07",
+          "end": "2026-04-17"
+        },
+        {
+          "name": "pfingstferien thüringen 2026",
+          "start": "2026-05-15",
+          "end": "2026-05-15"
+        },
+        {
+          "name": "sommerferien thüringen 2026",
+          "start": "2026-07-04",
+          "end": "2026-08-14"
+        },
+        {
+          "name": "herbstferien thüringen 2026",
+          "start": "2026-10-12",
+          "end": "2026-10-24"
+        },
+        {
+          "name": "weihnachtsferien thüringen 2026",
+          "start": "2026-12-23",
+          "end": "2027-01-02"
+        }
+      ]
     }
   },
   publicHolidays: {
