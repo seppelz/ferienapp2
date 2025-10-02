@@ -12,6 +12,8 @@ interface AppNavbarProps {
   onExport: () => void;
   person2State?: GermanState | null;
   onPerson2StateChange?: (state: GermanState | null) => void;
+  selectedYear?: number;
+  onYearChange?: (year: number) => void;
 }
 
 export const AppNavbar: React.FC<AppNavbarProps> = ({
@@ -22,7 +24,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
   onShowTutorial,
   onExport,
   person2State,
-  onPerson2StateChange
+  onPerson2StateChange,
+  selectedYear = 2026,
+  onYearChange
 }) => {
   return (
     <nav className={styles.navbar}>
@@ -47,9 +51,22 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
             />
           </div>
 
-          {/* Year display */}
-          <div className={styles.yearDisplay}>
-            <span className={styles.year}>2025</span>
+          {/* Year selector */}
+          <div className={styles.yearSelector}>
+            <button
+              onClick={() => onYearChange?.(2025)}
+              className={`${styles.yearButton} ${selectedYear === 2025 ? styles.active : ''}`}
+              aria-label="Jahr 2025 auswählen"
+            >
+              2025
+            </button>
+            <button
+              onClick={() => onYearChange?.(2026)}
+              className={`${styles.yearButton} ${selectedYear === 2026 ? styles.active : ''}`}
+              aria-label="Jahr 2026 auswählen"
+            >
+              2026
+            </button>
           </div>
 
           {/* Person 2 controls */}
