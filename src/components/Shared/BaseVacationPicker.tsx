@@ -12,6 +12,7 @@ export interface BaseVacationPickerProps {
   onClose: () => void;
   existingVacations: VacationPlan[];
   state: GermanState;
+  year?: number;
 }
 
 export interface DateRange {
@@ -27,10 +28,12 @@ export interface VacationPickerState {
 }
 
 export const useVacationPicker = (props: BaseVacationPickerProps) => {
+  const year = props.year || new Date().getFullYear();
+  
   const [state, setState] = useState<VacationPickerState>({
     startDate: null,
     endDate: null,
-    currentMonth: new Date(2025, 0, 1),
+    currentMonth: new Date(year, 0, 1),
     showCalendar: true
   });
 

@@ -14,6 +14,7 @@ interface MobileCalendarViewProps {
   personId: 1 | 2;
   otherPersonVacations: VacationPlan[];
   initialDate?: Date | null;
+  year?: number;
 }
 
 export const MobileCalendarView: React.FC<MobileCalendarViewProps> = ({
@@ -24,9 +25,10 @@ export const MobileCalendarView: React.FC<MobileCalendarViewProps> = ({
   onRemoveVacation,
   personId,
   otherPersonVacations = [],
-  initialDate = null
+  initialDate = null,
+  year = new Date().getFullYear()
 }) => {
-  const [month, setMonth] = useState(() => initialDate || new Date(2025, 0, 1));
+  const [month, setMonth] = useState(() => initialDate || new Date(year, 0, 1));
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -37,12 +39,14 @@ export const MobileCalendarView: React.FC<MobileCalendarViewProps> = ({
     bridgeDays.map(bd => bd.date)
   , [bridgeDays]);
 
-  // Update month when initialDate changes
+  // Update month when initialDate or year changes
   useEffect(() => {
     if (initialDate) {
       setMonth(initialDate);
+    } else {
+      setMonth(new Date(year, 0, 1));
     }
-  }, [initialDate]);
+  }, [initialDate, year]);
 
   // Cleanup feedback timeout
   useEffect(() => {
