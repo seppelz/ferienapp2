@@ -447,6 +447,18 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
     });
   };
 
+  const isDateDisabled = (date: Date): boolean => {
+    if (isBefore(date, today)) return true;
+    return false;
+  };
+
+  const isDateInRange = (date: Date): boolean => {
+    if (!props.startDate || !props.endDate) return false;
+    const start = props.startDate < props.endDate ? props.startDate : props.endDate;
+    const end = props.startDate < props.endDate ? props.endDate : props.startDate;
+    return isWithinInterval(date, { start, end });
+  };
+
   const getHolidayType = (
     date: Date,
     holidays: Holiday[],

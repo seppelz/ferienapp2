@@ -451,7 +451,7 @@ export const MainLayout: React.FC = () => {
                 setIsSelectingVacation(true);
                 // Focus January 1st after a short delay when clicking the button
                 setTimeout(() => {
-                  const jan1Button = calendarRef.current?.querySelector('[data-date="2025-01-01"]') as HTMLButtonElement;
+                  const jan1Button = calendarRef.current?.querySelector(`[data-date="${selectedYear}-01-01"]`) as HTMLButtonElement;
                   if (jan1Button) {
                     jan1Button.focus();
                   }
