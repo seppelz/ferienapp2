@@ -431,8 +431,8 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
   }, [props.endDate, props.isSelectingVacation]);
 
   const isDateDisabled = (date: Date) => {
-    // Only allow dates in 2025
-    if (date.getFullYear() !== 2025) return true;
+    // Don't allow dates in the past
+    if (isBefore(date, today)) return true;
     
     return props.disabledDates?.some(range => 
       isWithinInterval(date, { start: range.start, end: range.end })
@@ -445,18 +445,6 @@ export const DesktopCalendar: React.FC<ExtendedBaseCalendarProps> = (props) => {
       start: props.startDate < props.endDate ? props.startDate : props.endDate,
       end: props.startDate < props.endDate ? props.endDate : props.startDate
     });
-  };
-
-  const isDateDisabled = (date: Date): boolean => {
-    if (isBefore(date, today)) return true;
-    return false;
-  };
-
-  const isDateInRange = (date: Date): boolean => {
-    if (!props.startDate || !props.endDate) return false;
-    const start = props.startDate < props.endDate ? props.startDate : props.endDate;
-    const end = props.startDate < props.endDate ? props.endDate : props.startDate;
-    return isWithinInterval(date, { start, end });
   };
 
   const getHolidayType = (
