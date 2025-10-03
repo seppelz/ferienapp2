@@ -29,6 +29,7 @@ export interface BaseCalendarProps {
     person1: Array<{ date: Date; reason?: string }>;
     person2: Array<{ date: Date; reason?: string }>;
   };
+  year?: number;
 }
 
 export interface CalendarState {

@@ -111,7 +111,8 @@ export const Calendar: React.FC<CalendarProps> = (props) => {
     vacationCount: props.vacationCount,
     onVacationSelectComplete: props.onVacationSelectComplete,
     onShowRecommendations: props.onShowRecommendations,
-    recommendedDates: calendarData
+    recommendedDates: calendarData,
+    year: props.year
   };
 
   return isMobile ? (
