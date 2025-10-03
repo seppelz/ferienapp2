@@ -274,18 +274,186 @@ const HeroSection = () => {
     <section className={styles.hero}>
       <div className={styles.heroContent}>
         <div className={styles.heroText}>
-          <h1>Intelligente Urlaubsplanung mit Brückentagen</h1>
+          <h1>Brückentage 2026 optimal nutzen – Ferienplaner 2026</h1>
           <p>
-            Maximiere deinen Urlaub mit unserem smarten Urlaubsplaner. 
-            Plane effizient, nutze Brückentage und genieße mehr Freizeit.
+            Maximiere deinen Urlaub 2026 mit unserem intelligenten Ferienplaner. 
+            Brückentage 2026 clever planen und mit wenigen Urlaubstagen viele freie Tage gewinnen.
           </p>
-          <CTAButton>Jetzt Planen</CTAButton>
+          <CTAButton>Jetzt Urlaub 2026 Planen</CTAButton>
         </div>
         <HeroIllustration />
       </div>
     </section>
   );
 };
+
+// Bridge Days 2026 Content Section
+const BridgeDays2026Section = () => (
+  <section className={styles.bridgeDays2026}>
+    <div className={styles.sectionContent}>
+      <h2>Brückentage 2026: So verlängern Sie Ihren Urlaub</h2>
+      
+      <div className={styles.introText}>
+        <p>
+          Das Jahr 2026 bietet zahlreiche Möglichkeiten, mit wenigen Urlaubstagen viel Freizeit zu gewinnen. 
+          Viele gesetzliche Feiertage fallen günstig auf Wochentage. Mit unserem Ferienplaner 2026 
+          finden Sie die optimalen Brückentage für Ihr Bundesland.
+        </p>
+      </div>
+
+      <div className={styles.bridgeDaysList}>
+        <article className={styles.bridgeDayCard}>
+          <h3>🎆 Neujahr (1. Januar 2026 – Donnerstag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Freitag, den 2. Januar frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Donnerstag bis Sonntag am Stück freihaben. Perfekter Start ins neue Jahr!
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>👑 Heilige Drei Könige (6. Januar 2026 – Dienstag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Montag, den 5. Januar frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Gilt für Baden-Württemberg, Bayern und Sachsen-Anhalt. Verlängertes Wochenende zu Jahresbeginn.
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>🐣 Ostern (3.-6. April 2026)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Donnerstag, den 2. April frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Von Karfreitag (3. April) bis Ostermontag (6. April) ist bereits frei. 
+              Mit einem zusätzlichen Urlaubstag am Donnerstag davor genießen Sie vier Tage am Stück.
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>🌹 Tag der Arbeit (1. Mai 2026 – Freitag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Donnerstag, den 30. April frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Der 1. Mai fällt auf einen Freitag – ideal für ein verlängertes Wochenende. 
+              Mit einem Brückentag am Donnerstag haben Sie vier Tage frei.
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>☁️ Christi Himmelfahrt (14. Mai 2026 – Donnerstag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Freitag, den 15. Mai frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Einer der beliebtesten Brückentage! Mit nur einem Urlaubstag ein langes Wochenende sichern.
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>🕊️ Pfingstmontag (25. Mai 2026 – Montag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Freitag, den 22. Mai frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Pfingsten bietet bereits ein verlängertes Wochenende. Optimieren Sie es mit einem Brückentag.
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>✝️ Fronleichnam (4. Juni 2026 – Donnerstag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Freitag, den 5. Juni frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Gilt für Baden-Württemberg, Bayern, Hessen, NRW, Rheinland-Pfalz und Saarland.
+            </p>
+          </div>
+        </article>
+
+        <article className={styles.bridgeDayCard}>
+          <h3>🎄 Weihnachten (25. Dezember 2026 – Freitag)</h3>
+          <div className={styles.bridgeDayContent}>
+            <div className={styles.recommendation}>
+              <strong>Empfehlung:</strong> Nehmen Sie Donnerstag, den 24. Dezember frei
+            </div>
+            <div className={styles.benefit}>
+              <span className={styles.days}>1 Urlaubstag</span> = 
+              <span className={styles.freeDays}>4 Tage frei</span>
+            </div>
+            <p className={styles.explanation}>
+              Heiligabend bis Sonntag frei – der perfekte Start in die Feiertage.
+            </p>
+          </div>
+        </article>
+      </div>
+
+      <div className={styles.seoText}>
+        <h3>Ferienplaner 2026: Alle Feiertage im Überblick</h3>
+        <p>
+          Unser Ferienplaner 2026 berücksichtigt alle gesetzlichen Feiertage in Deutschland und zeigt Ihnen 
+          automatisch die besten Brückentage für Ihr Bundesland. Mit der intelligenten Brückentag-Berechnung 
+          können Sie Ihren Jahresurlaub optimal planen und mit wenigen Urlaubstagen maximale Freizeit gewinnen.
+        </p>
+        <p>
+          <strong>Wichtig:</strong> Nicht alle Feiertage gelten in allen Bundesländern. Unser Ferienplaner 
+          zeigt Ihnen nur die für Ihr Bundesland relevanten Feiertage und Brückentage 2026 an.
+        </p>
+      </div>
+
+      <div className={styles.ctaBox}>
+        <h3>Jetzt Ihren Urlaub 2026 optimal planen</h3>
+        <p>Nutzen Sie unseren kostenlosen Ferienplaner, um die besten Brückentage 2026 für Ihr Bundesland zu finden.</p>
+        <CTAButton>Zum Ferienplaner 2026</CTAButton>
+      </div>
+    </div>
+  </section>
+);
 
 const FeaturesSection = () => (
   <section className={styles.features}>
@@ -567,6 +735,7 @@ export const LandingPage: React.FC = () => {
       <MetaTags />
       <main>
         <HeroSection />
+        <BridgeDays2026Section />
         <FeaturesSection />
         <DemoSection />
         <BenefitsSection />

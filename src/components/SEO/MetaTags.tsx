@@ -11,9 +11,9 @@ interface MetaTagsProps {
 }
 
 export const MetaTags: React.FC<MetaTagsProps> = ({
-  title = 'Urlaubsplaner mit Brückentagen | Intelligente Urlaubsplanung',
-  description = 'Maximiere deinen Urlaub mit unserem smarten Urlaubsplaner. Brückentage optimal nutzen, Feiertage für alle Bundesländer, Zwei-Personen Planung und mehr.',
-  keywords = 'Urlaubsplaner, Brückentage Rechner, Urlaubsplanung, Feiertage Kalender, Urlaubstage optimieren, Urlaubsplaner für Paare, Bundesland Feiertage',
+  title = 'Brückentage 2026 & Ferienplaner 2026 | Urlaubsplanung optimal',
+  description = 'Brückentage 2026 optimal nutzen! Intelligenter Ferienplaner 2026 mit allen Feiertagen, Schulferien und Brückentag-Empfehlungen für Deutschland. Maximiere deinen Urlaub 2026.',
+  keywords = 'Brückentage 2026, Ferienplaner 2026, Urlaubsplaner 2026, Feiertage 2026 Deutschland, Brückentage 2026 Deutschland, Urlaubsplanung 2026, Schulferien 2026, Brückentage optimal nutzen, Feiertage Kalender 2026, Urlaubstage planen 2026',
   ogImage = '/holiday/og-image.jpg',
   ogUrl = window.location.origin + '/holiday',
   canonicalUrl = window.location.origin + '/holiday',

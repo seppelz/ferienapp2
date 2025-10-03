@@ -1551,4 +1551,198 @@ h2 {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Bridge Days 2026 Section */
+.bridgeDays2026 {
+  padding: 80px 20px;
+  background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+}
+
+.bridgeDays2026 h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--deep-ocean);
+}
+
+.bridgeDays2026 .introText {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.bridgeDays2026 .introText p {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #555;
+}
+
+.bridgeDaysList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto 4rem;
+}
+
+.bridgeDayCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid var(--ocean-blue);
+}
+
+.bridgeDayCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.bridgeDayCard h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--deep-ocean);
+  font-weight: 600;
+}
+
+.bridgeDayContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recommendation {
+  font-size: 1rem;
+  color: #333;
+  padding: 0.75rem;
+  background: #e3f2fd;
+  border-radius: 8px;
+}
+
+.recommendation strong {
+  color: var(--ocean-blue);
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--turquoise) 100%);
+  border-radius: 8px;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.benefit .days {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.benefit .freeDays {
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.explanation {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+.seoText {
+  max-width: 900px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.seoText h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--deep-ocean);
+}
+
+.seoText p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.ctaBox {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, var(--ocean-blue) 0%, var(--turquoise) 100%);
+  border-radius: 16px;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0, 119, 182, 0.3);
+}
+
+.ctaBox h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.ctaBox p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+/* Responsive design for Bridge Days Section */
+@media (max-width: 768px) {
+  .bridgeDays2026 {
+    padding: 60px 20px;
+  }
+
+  .bridgeDays2026 h2 {
+    font-size: 2rem;
+  }
+
+  .bridgeDaysList {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .bridgeDayCard {
+    padding: 1.5rem;
+  }
+
+  .bridgeDayCard h3 {
+    font-size: 1.1rem;
+  }
+
+  .benefit {
+    font-size: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .seoText {
+    padding: 1.5rem;
+  }
+
+  .seoText h3 {
+    font-size: 1.5rem;
+  }
+
+  .ctaBox {
+    padding: 2rem 1.5rem;
+  }
+
+  .ctaBox h3 {
+    font-size: 1.5rem;
+  }
 } 
